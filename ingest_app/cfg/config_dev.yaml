@@ -1,0 +1,5 @@
+appName: ingest_app
+logLevel: INFO
+CONFIG:
+  log_file_path: "APP_ROOT_DIR/log"
+  source_file_path: "APP_ROOT_DIR/data"
