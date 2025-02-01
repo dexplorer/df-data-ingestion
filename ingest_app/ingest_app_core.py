@@ -45,11 +45,21 @@ def ingest_file(ingestion_workflow_id) -> list:
     )
 
     # source_file_path = "/workspaces/df-data-ingestion/ingest_app/data/acct_positions_20241226.csv"
-    target_file_path = "/workspaces/df-data-ingestion/ingest_app/data/output/tacct_position"
+    # target_file_path = "/workspaces/df-data-ingestion/ingest_app/data/output/tacct_position"
+
+    qual_target_table_name = tgt_dataset.get_qualified_table_name()
+    target_database_name = tgt_dataset.database_name
+    partition_keys = tgt_dataset.partition_keys
 
     # Load the file
-    records, columns = sl.load_file_to_table(source_file_path, target_file_path)
+    records, columns = sl.load_file_to_table(
+        source_file_path=source_file_path,
+        qual_target_table_name=qual_target_table_name,
+        target_database_name=target_database_name,
+        partition_keys=partition_keys,
+        cur_eff_date=cur_eff_date
+    )
 
-    print(f"{records} records are loaded.")
-    logging.info("%d records are loaded.", records)
+    print(f"{records} records are loaded into {qual_target_table_name}.")
+    logging.info("%d records are loaded into %s.", records, qual_target_table_name)
     return records

@@ -3,3 +3,4 @@ logLevel: INFO
 CONFIG:
   log_file_path: "APP_ROOT_DIR/log"
   source_file_path: "APP_ROOT_DIR/data"
+  warehouse_path: "APP_ROOT_DIR/data/user/hive/warehouse"

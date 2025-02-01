@@ -1,13 +1,17 @@
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType
+
+from ingest_app import settings as sc
 
 import logging
 
-def create_spark_session():
+def create_spark_session(warehouse_path) -> SparkSession:
     # Initialize Spark session
     spark = SparkSession.builder \
-        .appName("CSV to Parquet with PartitionOverwrite") \
+        .appName("Spark Loader in Ingestion Workflow") \
+        .config("spark.sql.warehouse.dir", warehouse_path) \
+        .enableHiveSupport() \
         .getOrCreate()
 
     # Enable dynamic partition overwrite
@@ -15,7 +19,7 @@ def create_spark_session():
 
     return spark
 
-def define_file_schema():
+def define_file_schema() -> StructType:
     # Define the file schema
     schema = StructType([
         StructField("effective_date", StringType(), True),
@@ -25,15 +29,15 @@ def define_file_schema():
     ])
     return schema
 
-def create_spark_dataframe(spark_session, source_file_path):
+def create_spark_dataframe(spark: SparkSession, source_file_path: str, schema: StructType):
     # Sample data about customers from different months
     # data = [("Rajesh", "2023", "08"), ("Sunita", "2023", "09")]
     # columns = ["name", "year", "month"]
 
     logging.info("Reading the file %s", source_file_path)
-    # df = spark_session.createDataFrame(data, schema=columns)
-    # df = spark_session.createDataFrame(data, schema=schema)
-    df = spark_session.read \
+    # df = spark.createDataFrame(data, schema=columns)
+    # df = spark.createDataFrame(data, schema=schema)
+    df = spark.read \
         .format("csv") \
         .option("header", "true") \
         # .option("inferSchema", "true") \
@@ -41,19 +45,34 @@ def create_spark_dataframe(spark_session, source_file_path):
         .load(source_file_path)
     return df 
 
-def write_spark_dataframe(df):
+def create_target_database(spark: SparkSession, target_database_name: str):
+    # Create database 
+    spark.sql(f"CREATE DATABASE IF NOT EXISTS {target_database_name};")
+
+def write_spark_dataframe(df: DataFrame, qual_target_table_name: str, partition_keys: list[str]):
     # Write data partitioned by year and month
     # df.write.partitionBy("year", "month").mode("overwrite").format("parquet").save("/workspaces/df-data-ingestion/ingest_app/data/output/")
-    df.write \
-    .partitionBy("effective_date") \
-    .mode("overwrite") \
-    .format("parquet") \
-    .save(target_file_path)
 
-def load_file_to_table(source_file_path, target_file_path):
-    spark = create_spark_session()
+    # df.write \
+    # .partitionBy("effective_date") \
+    # .mode("overwrite") \
+    # .format("parquet") \
+    # .save(target_file_path)
+
+    df.write \
+    .saveAsTable(name=qual_target_table_name, format="parquet", mode="overwrite", partitionBy=partition_keys)
+
+def validate_load(spark: SparkSession, qual_target_table_name: str, cur_eff_date: str):
+    df = spark.sql(f"SELECT '{qual_target_table_name}' AS QUAL_TABLE_NAME, COUNT(1) AS ROW_COUNT FROM {qual_target_table_name} WHERE EFFECTIVE_DATE={cur_eff_date};")
+    df.head(1)
+
+def load_file_to_table(source_file_path: str, qual_target_table_name: str, target_database_name: str, partition_keys: list[str], cur_eff_date: str):
+    spark = create_spark_session(warehouse_path=sc.warehouse_path)
     schema = define_file_schema()
-    df = create_spark_dataframe(spark_session=spark)
-    write_spark_dataframe(df)
+    df = create_spark_dataframe(spark=spark, source_file_path=source_file_path, schema=schema)
+    create_target_database(spark=spark, target_database_name=target_database_name)
+    write_spark_dataframe(df=df, qual_target_table_name=qual_target_table_name, partition_keys=partition_keys)
+    validate_load(spark=spark, qual_target_table_name=qual_target_table_name, cur_eff_date=cur_eff_date)
+
     return df.shape()
     
