@@ -3,11 +3,13 @@ install: requirements.txt
 	pip install -r requirements.txt
 
 setup: 
-	python setup.py install
+	# python setup.py install
+	pip install . 
 
 lint:
 	pylint --disable=R,C *.py &&\
 	pylint --disable=R,C ingest_app/*.py &&\
+	pylint --disable=R,C ingest_app/*/*.py &&\
 	pylint --disable=R,C ingest_app/tests/*.py
 
 test:
@@ -16,6 +18,7 @@ test:
 format:
 	black *.py &&\
 	black ingest_app/*.py &&\
+	black ingest_app/*/*.py &&\
 	black ingest_app/tests/*.py
 
 all:

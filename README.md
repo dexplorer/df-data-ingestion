@@ -1,6 +1,8 @@
 # df-data-ingestion
 
-This application runs a data ingestion workflow to ingest a delimited file into a spark table. Application can be invoked using CLI or REST API end points. This allows the app to be integrated into a larger data ingestion / distribution framework.
+This application runs a data ingestion workflow to ingest a delimited file into a spark table. 
+
+Application can be invoked using CLI or REST API end points. This allows the app to be integrated into a larger data ingestion / distribution framework.
 
 ### Install
 
@@ -14,6 +16,11 @@ This application runs a data ingestion workflow to ingest a delimited file into 
 - **Run a ingestion workflow via CLI**:
   ```sh
     ingest_app run-ingestion-workflow --ingestion_workflow_id "2" --env "dev"
+  ```
+
+- **Run a ingestion workflow via CLI with cycle date override**:
+  ```sh
+    ingest_app run-ingestion-workflow --ingestion_workflow_id "2" --env "dev" --cycle_date "2024-12-24"
   ```
 
 - **Run a ingestion workflow via API**:

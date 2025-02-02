@@ -12,12 +12,13 @@ from utils import logger as ufl
 @click.option(
     "--ingestion_workflow_id",
     type=str,
-    default="dev",
+    default="0",
     help="Ingestion workflow id",
     required=True,
 )
 @click.option("--env", type=str, default="dev", help="Environment")
-def run_ingestion_workflow(ingestion_workflow_id: str, env: str):
+@click.option("--cycle_date", type=str, default="", help="Cycle date")
+def run_ingestion_workflow(ingestion_workflow_id: str, env: str, cycle_date: str):
     """
     Run the ingestion workflow.
     """
@@ -30,7 +31,9 @@ def run_ingestion_workflow(ingestion_workflow_id: str, env: str):
     logging.info("Configs are set")
 
     logging.info("Running the ingestion workflow %s", ingestion_workflow_id)
-    records_count = dic.run_ingestion_workflow(ingestion_workflow_id=ingestion_workflow_id)
+    records_count = dic.run_ingestion_workflow(
+        ingestion_workflow_id=ingestion_workflow_id, cycle_date=cycle_date
+    )
 
     logging.info("Records loaded by the ingestion workflow %s", ingestion_workflow_id)
     logging.info(records_count)
