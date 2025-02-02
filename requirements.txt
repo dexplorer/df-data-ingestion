@@ -9,6 +9,8 @@ confuse
 setuptools
 # app specific 
 pyspark
+python-dateutil
+pandas
 click 
 fastapi 
 uvicorn[standard] 

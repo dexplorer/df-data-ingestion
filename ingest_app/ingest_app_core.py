@@ -1,4 +1,5 @@
 from metadata import dataset as ds
+from app_calendar import eff_date as ed  
 from metadata import ingestion_workflow as iw
 from metadata import ingestion_task as it
 from utils import file_io as uff
@@ -9,7 +10,7 @@ from ingest_app.ingest_spark import loader as sl
 import logging
 
 
-def ingest_file(ingestion_workflow_id) -> list:
+def run_ingestion_workflow(ingestion_workflow_id) -> list:
 
     # Simulate getting the ingestion workflow metadata from API
     logging.info("Get ingestion workflow metadata")
@@ -36,7 +37,7 @@ def ingest_file(ingestion_workflow_id) -> list:
         )
 
     # Get current effective date
-    cur_eff_date = ed.get_cur_eff_date(schedule_id=dataset.schedule_id)
+    cur_eff_date = ed.get_cur_eff_date(schedule_id=src_dataset.schedule_id)
     cur_eff_date_yyyymmdd = ed.fmt_date_str_as_yyyymmdd(cur_eff_date)
 
     # Read the source data file
@@ -52,12 +53,12 @@ def ingest_file(ingestion_workflow_id) -> list:
     partition_keys = tgt_dataset.partition_keys
 
     # Load the file
-    records, columns = sl.load_file_to_table(
+    records = sl.load_file_to_table(
         source_file_path=source_file_path,
         qual_target_table_name=qual_target_table_name,
         target_database_name=target_database_name,
         partition_keys=partition_keys,
-        cur_eff_date=cur_eff_date
+        cur_eff_date=cur_eff_date,
     )
 
     print(f"{records} records are loaded into {qual_target_table_name}.")

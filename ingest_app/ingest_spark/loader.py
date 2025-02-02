@@ -1,6 +1,6 @@
 
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructType, StructField, StringType
+from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 
 from ingest_app import settings as sc
 
@@ -40,7 +40,6 @@ def create_spark_dataframe(spark: SparkSession, source_file_path: str, schema: S
     df = spark.read \
         .format("csv") \
         .option("header", "true") \
-        # .option("inferSchema", "true") \
         .option("schema", schema) \
         .load(source_file_path)
     return df 
@@ -62,9 +61,22 @@ def write_spark_dataframe(df: DataFrame, qual_target_table_name: str, partition_
     df.write \
     .saveAsTable(name=qual_target_table_name, format="parquet", mode="overwrite", partitionBy=partition_keys)
 
-def validate_load(spark: SparkSession, qual_target_table_name: str, cur_eff_date: str):
-    df = spark.sql(f"SELECT '{qual_target_table_name}' AS QUAL_TABLE_NAME, COUNT(1) AS ROW_COUNT FROM {qual_target_table_name} WHERE EFFECTIVE_DATE={cur_eff_date};")
-    df.head(1)
+def validate_load(spark: SparkSession, source_df: DataFrame, qual_target_table_name: str, cur_eff_date: str):
+    df = spark.sql(f"SELECT COUNT(1) AS ROW_COUNT FROM {qual_target_table_name} WHERE EFFECTIVE_DATE='{cur_eff_date}';")
+    target_record_count = df.first()["ROW_COUNT"]
+    source_record_count = source_df.count()
+    
+    if source_record_count == target_record_count:
+        print("Load is successful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
+    else:
+        print("Load is unsuccessful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
+
+    return target_record_count
+
+def view_data(spark: SparkSession, qual_target_table_name: str, cur_eff_date: str):
+    df = spark.sql(f"SELECT * FROM {qual_target_table_name} WHERE EFFECTIVE_DATE='{cur_eff_date}';")
+    df.printSchema()
+    df.show(2)
 
 def load_file_to_table(source_file_path: str, qual_target_table_name: str, target_database_name: str, partition_keys: list[str], cur_eff_date: str):
     spark = create_spark_session(warehouse_path=sc.warehouse_path)
@@ -72,7 +84,8 @@ def load_file_to_table(source_file_path: str, qual_target_table_name: str, targe
     df = create_spark_dataframe(spark=spark, source_file_path=source_file_path, schema=schema)
     create_target_database(spark=spark, target_database_name=target_database_name)
     write_spark_dataframe(df=df, qual_target_table_name=qual_target_table_name, partition_keys=partition_keys)
-    validate_load(spark=spark, qual_target_table_name=qual_target_table_name, cur_eff_date=cur_eff_date)
+    view_data(spark=spark, qual_target_table_name=qual_target_table_name, cur_eff_date=cur_eff_date)
+    target_record_count = validate_load(spark=spark, source_df=df, qual_target_table_name=qual_target_table_name, cur_eff_date=cur_eff_date)
 
-    return df.shape()
+    return target_record_count
     

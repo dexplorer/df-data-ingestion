@@ -13,6 +13,7 @@ setuptools.setup(
     ],
     # packages = find_packages(),
     install_requires=[
+        "pyspark==3.5.4",
         "setuptools",
         "requests",
         "utils@git+https://github.com/dexplorer/utils#egg=utils-1.0.2",
