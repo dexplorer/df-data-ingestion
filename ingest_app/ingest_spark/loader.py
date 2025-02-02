@@ -67,9 +67,9 @@ def validate_load(spark: SparkSession, source_df: DataFrame, qual_target_table_n
     source_record_count = source_df.count()
     
     if source_record_count == target_record_count:
-        print("Load is successful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
+        print(f"Load is successful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
     else:
-        print("Load is unsuccessful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
+        print(f"Load is unsuccessful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}")
 
     return target_record_count
 

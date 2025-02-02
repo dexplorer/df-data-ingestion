@@ -51,12 +51,182 @@ effective_date,account_id,asset_id,asset_value
 ```
 
 ### API Data (simulated)
-These are metadata that would be captured via the DQ application UI and stored in a database.
+These are metadata that would be captured via the Metadata Management UI and stored in a database.
 
   ##### datasets 
 ```
+{
+    "datasets": [
+      {
+        "dataset_id": "2",
+        "catalog_ind": true,
+        "file_delim": ",",
+        "file_path": "APP_ROOT_DIR/data/acct_positions_yyyymmdd.csv",
+        "schedule_id": "2",
+        "dq_rule_ids": [], 
+        "model_parameters": {
+          "features": [
+            {
+              "column": "account_id",
+              "variable_type": "category",
+              "variable_sub_type": "nominal",
+              "encoding": "frequency"
+            },
+            {
+              "column": "asset_id",
+              "variable_type": "category",
+              "variable_sub_type": "nominal",
+              "encoding": "one hot"
+            },
+            {
+              "column": "asset_value",
+              "variable_type": "numeric",
+              "variable_sub_type": "float",
+              "encoding": "numeric"
+            }
+          ],
+          "hist_data_snapshots": [
+            {
+              "snapshot": "t-1d"
+            },
+            {
+              "snapshot": "lme"
+            }
+          ],
+          "sample_size": 10000
+        }, 
+        "recon_file_delim": "|", 
+        "recon_file_path": "APP_ROOT_DIR/data/acct_positions_yyyymmdd.recon" 
+      },
+      {
+        "dataset_id": "12",
+        "catalog_ind": true,
+        "schedule_id": null, 
+        "dq_rule_ids": null, 
+        "model_parameters": null, 
+        "database_name": "dl_asset_mgmt", 
+        "table_name": "tacct_pos", 
+        "partition_keys": [
+          "effective_date" 
+        ]
+      }
+    ]
+  }
 
+```
+
+  ##### Ingestion Workflows 
+```
+{
+    "ingestion_workflows": [
+      {
+        "ingestion_workflow_id": "2",
+        "ingestion_task_id": "2",
+        "pre_ingestion_tasks": [
+          {
+            "name": "data quality",
+            "required_parameters": {
+              "dataset_id": "2"
+            }
+          },
+          {
+            "name": "data quality ml",
+            "required_parameters": {
+              "dataset_id": "2"
+            }
+          },
+          {
+            "name": "data profile",
+            "required_parameters": {
+              "dataset_id": "2"
+            }
+          }
+        ],
+        "post_ingestion_tasks": [
+          {
+            "name": "data recon",
+            "required_parameters": {
+              "dataset_id": "12"
+            }
+          }
+        ]
+      }
+    ]
+  }
+
+```
+
+  ##### Ingestion Tasks 
+```
+{
+    "ingestion_tasks": [
+      {
+        "ingestion_task_id": "1",
+        "source_dataset_id": "1",
+        "target_dataset_id": "11",
+        "ingestion_pattern": {
+            "loader": "spark",
+            "source_type": "delimited file", 
+            "target_type": "spark table", 
+            "load_type": "full", 
+            "idempotent": true 
+        } 
+      },
+      {
+        "ingestion_task_id": "2",
+        "source_dataset_id": "2",
+        "target_dataset_id": "12",
+        "ingestion_pattern": {
+            "loader": "spark",
+            "source_type": "delimited file", 
+            "target_type": "spark table", 
+            "load_type": "incremental", 
+            "idempotent": true 
+        } 
+      },
+      {
+        "ingestion_task_id": "3",
+        "source_dataset_id": "3",
+        "target_dataset_id": "13",
+        "ingestion_pattern": {
+            "loader": "spark",
+            "source_type": "delimited file", 
+            "target_type": "spark table", 
+            "load_type": "incremental", 
+            "idempotent": true 
+        } 
+      }
+    ]
+  }
+  
 ```
 
 ### Sample Output 
 
+  ##### Schema 
+```
+root
+ |-- account_id: string (nullable = true)
+ |-- asset_id: string (nullable = true)
+ |-- asset_value: string (nullable = true)
+ |-- effective_date: string (nullable = true)
+
+```
+
+  ##### Sample Data 
+```
++----------+--------+-----------+--------------+
+|account_id|asset_id|asset_value|effective_date|
++----------+--------+-----------+--------------+
+|      ACC1|       1|     -35000|    2024-12-26|
+|      ACC1|       2|     -15000|    2024-12-26|
++----------+--------+-----------+--------------+
+only showing top 2 rows
+
+```
+
+  ##### Validation 
+```
+Load is successful. Source Record Count = 9, Target Record Count = 9
+
+```
