@@ -30,12 +30,8 @@ def load_config(env):
         raise
 
     cfg = config["CONFIG"].get()
-
     logging.info(cfg)
-    return cfg
 
-
-def set_config(cfg):
     global log_file_path
     log_file_path = f"{resolve_app_path(cfg['log_file_path'])}"
 
