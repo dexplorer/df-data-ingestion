@@ -10,6 +10,7 @@ from ingest_app.ingest_spark import loader as sl
 # Replace this with a API call in test/prod env
 from dr_app import dr_app_core as drc
 from dq_app import dq_app_core as dqc
+from dqml_app import dqml_app_core as dqmlc
 
 import logging
 
@@ -67,44 +68,73 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> int:
     return records
 
 
+def run_data_quality_task(required_parameters: dict, cycle_date: str):
+    dataset_id = required_parameters["dataset_id"]
+    logging.info("Start applying data quality rules on the dataset %s", dataset_id)
+    dq_check_results = dqc.apply_dq_rules(dataset_id=dataset_id, cycle_date=cycle_date)
+
+    logging.info(
+        "Finished applying data quality rules on the dataset %s",
+        dataset_id,
+    )
+
+    logging.info("Data quality check results for dataset %s", dataset_id)
+    logging.info(dq_check_results)
+
+
+def run_data_quality_ml_task(required_parameters: dict, cycle_date: str):
+    dataset_id = required_parameters["dataset_id"]
+    logging.info("Started detecting anomalies in the dataset %s", dataset_id)
+    column_scores = dqmlc.detect_anomalies(dataset_id=dataset_id, cycle_date=cycle_date)
+
+    logging.info("Column/Feature scores for dataset %s", dataset_id)
+    logging.info(column_scores)
+
+    logging.info("Finished detecting anomalies in the dataset %s", dataset_id)
+
+
+def run_data_profile_task(required_parameters: dict, cycle_date: str):
+    pass
+
+
+def run_data_recon_task(required_parameters: dict, cycle_date: str):
+    dataset_id = required_parameters["dataset_id"]
+    logging.info(
+        "Start applying data reconciliation rules on the dataset %s", dataset_id
+    )
+    dr_check_results = drc.apply_dr_rules(dataset_id=dataset_id, cycle_date=cycle_date)
+
+    logging.info(
+        "Finished applying data reconciliation rules on the dataset %s",
+        dataset_id,
+    )
+
+    logging.info("Data reconciliation check results for dataset %s", dataset_id)
+    logging.info(dr_check_results)
+
+
 def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
     for task in tasks:
         if task.name == "data quality":
-            dataset_id = task.required_parameters["dataset_id"]
-            logging.info(
-                "Start applying data quality rules on the dataset %s", dataset_id
+            run_data_quality_task(
+                required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-            dq_check_results = dqc.apply_dq_rules(
-                dataset_id=dataset_id, cycle_date=cycle_date
+        elif task.name == "data quality ml":
+            run_data_quality_ml_task(
+                required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-
-            logging.info(
-                "Finished applying data quality rules on the dataset %s",
-                dataset_id,
+        if task.name == "data profile":
+            run_data_profile_task(
+                required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-
-            logging.info("Data quality check results for dataset %s", dataset_id)
-            logging.info(dq_check_results)
 
 
 def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
     for task in tasks:
         if task.name == "data reconciliation":
-            dataset_id = task.required_parameters["dataset_id"]
-            logging.info(
-                "Start applying data reconciliation rules on the dataset %s", dataset_id
+            run_data_recon_task(
+                required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-            dr_check_results = drc.apply_dr_rules(
-                dataset_id=dataset_id, cycle_date=cycle_date
-            )
-
-            logging.info(
-                "Finished applying data reconciliation rules on the dataset %s",
-                dataset_id,
-            )
-
-            logging.info("Data reconciliation check results for dataset %s", dataset_id)
-            logging.info(dr_check_results)
 
 
 def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:

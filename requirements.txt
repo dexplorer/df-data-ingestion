@@ -11,6 +11,12 @@ setuptools
 pyspark
 python-dateutil
 pandas
+datetime
+xgboost
+scikit-learn[model_selection]
+scikit-learn[pre_processing]
+shap 
+matplotlib
 click 
 fastapi 
 uvicorn[standard] 
@@ -20,3 +26,5 @@ git+https://github.com/dexplorer/utils#egg=utils
 git+https://github.com/dexplorer/df-metadata#egg=metadata
 git+https://github.com/dexplorer/df-app-calendar#egg=app_calendar
 git+https://github.com/dexplorer/df-data-recon#egg=dr_app
+git+https://github.com/dexplorer/df-data-quality#egg=dq_app
+git+https://github.com/dexplorer/df-data-quality-ml#egg=dqml_app
