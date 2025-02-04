@@ -9,6 +9,7 @@ from ingest_app.ingest_spark import loader as sl
 
 # Replace this with a API call in test/prod env
 from dr_app import dr_app_core as drc
+from dq_app import dq_app_core as dqc
 
 import logging
 
@@ -66,8 +67,24 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> int:
     return records
 
 
-def run_pre_ingestion_tasks():
-    pass
+def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
+    for task in tasks:
+        if task.name == "data quality":
+            dataset_id = task.required_parameters["dataset_id"]
+            logging.info(
+                "Start applying data quality rules on the dataset %s", dataset_id
+            )
+            dq_check_results = dqc.apply_dq_rules(
+                dataset_id=dataset_id, cycle_date=cycle_date
+            )
+
+            logging.info(
+                "Finished applying data quality rules on the dataset %s",
+                dataset_id,
+            )
+
+            logging.info("Data quality check results for dataset %s", dataset_id)
+            logging.info(dq_check_results)
 
 
 def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
@@ -100,6 +117,9 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
 
     # Run pre-ingestion tasks
     logging.info("Running the pre-ingestion tasks.")
+    run_pre_ingestion_tasks(
+        tasks=ingestion_workflow.pre_ingestion_tasks, cycle_date=cycle_date
+    )
 
     # Run ingestion task
     logging.info("Running the ingestion task.")
