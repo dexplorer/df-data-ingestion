@@ -4,13 +4,13 @@ import logging
 
 config = confuse.Configuration("ingest_app", __name__)
 
-global APP_ROOT_DIR
+# global APP_ROOT_DIR
 APP_ROOT_DIR = "/workspaces/df-data-ingestion/ingest_app"
 
 # Define config variables at module scope
 log_file_path = ""
 source_file_path = ""
-warehouse_location = ""
+warehouse_path = ""
 
 
 def load_config(env):

@@ -81,9 +81,11 @@ def write_spark_dataframe(
     # Drop the table for testing
     # spark.sql(f"drop table if exists {qual_target_table_name}")
 
+    logging.info("Loading the table %s", qual_target_table_name)
+
     # Check if table exists
     if spark.catalog.tableExists(tableName=qual_target_table_name):
-        print("Table exists. Insert/overwrite the partition.")
+        logging.debug("Table exists. Insert/overwrite the partition.")
 
         # Get the target table columns list. Use this to arrange the source dataframe such that the partition keys are at the end of the list.
         target_table_columns = spark.catalog.listColumns(
@@ -96,7 +98,7 @@ def write_spark_dataframe(
             tableName=qual_target_table_name, overwrite=True
         )
     else:
-        print("Table does not exist. Creating a new table with partition.")
+        logging.debug("Table does not exist. Creating a new table with partition.")
         df.write.saveAsTable(
             name=qual_target_table_name,
             format="parquet",
@@ -118,18 +120,18 @@ def validate_load(
     source_record_count = source_df.count()
 
     if source_record_count == target_record_count:
-        print(
+        logging.info(
             f"Load is successful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}"
         )
     else:
-        print(
+        logging.error(
             f"Load is unsuccessful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}"
         )
 
     return target_record_count
 
 
-def view_data(spark: SparkSession, qual_target_table_name: str, cur_eff_date: str):
+def view_loaded_data_sample(spark: SparkSession, qual_target_table_name: str, cur_eff_date: str):
     df = spark.sql(
         f"SELECT * FROM {qual_target_table_name} WHERE EFFECTIVE_DATE='{cur_eff_date}';"
     )
@@ -157,7 +159,7 @@ def load_file_to_table(
         qual_target_table_name=qual_target_table_name,
         partition_keys=partition_keys,
     )
-    view_data(
+    view_loaded_data_sample(
         spark=spark,
         qual_target_table_name=qual_target_table_name,
         cur_eff_date=cur_eff_date,

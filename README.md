@@ -6,9 +6,10 @@ Application can be invoked using CLI or REST API end points. This allows the app
 
 ### Install
 
-- **Install via setuptools**:
-  ```sh
-    python setup.py install
+- **Install via Makefile and pip**:
+  ```
+    make install
+    make setup
   ```
 
 ### Usage Examples

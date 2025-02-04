@@ -2,7 +2,6 @@ from metadata import dataset as ds
 from app_calendar import eff_date as ed
 from metadata import ingestion_workflow as iw
 from metadata import ingestion_task as it
-from utils import file_io as uff
 
 from ingest_app import settings as sc
 from ingest_app.ingest_spark import loader as sl
@@ -11,23 +10,26 @@ from ingest_app.ingest_spark import loader as sl
 from dr_app import dr_app_core as drc
 from dq_app import dq_app_core as dqc
 from dqml_app import dqml_app_core as dqmlc
+from dp_app import dp_app_core as dpc 
 
 import logging
 
 
-def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> int:
+def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     # Simulate getting the ingestion task metadata from API
     logging.info("Get ingestion task metadata")
     ingestion_task = it.IngestionTask.from_json(ingestion_task_id=ingestion_task_id)
 
     # Simulate getting the source dataset metadata from API
     logging.info("Get source dataset metadata")
+    src_dataset = []
     if ingestion_task.ingestion_pattern.source_type == ds.DatasetKind.LOCAL_DELIM_FILE:
         src_dataset = ds.LocalDelimFileDataset.from_json(
             dataset_id=ingestion_task.source_dataset_id
         )
 
     logging.info("Get target dataset metadata")
+    tgt_dataset = []
     if ingestion_task.ingestion_pattern.target_type == ds.DatasetKind.SPARK_TABLE:
         tgt_dataset = ds.SparkTableDataset.from_json(
             dataset_id=ingestion_task.target_dataset_id
@@ -63,12 +65,10 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> int:
         cur_eff_date=cur_eff_date,
     )
 
-    print(f"{records} records are loaded into {qual_target_table_name}.")
     logging.info("%d records are loaded into %s.", records, qual_target_table_name)
-    return records
 
 
-def run_data_quality_task(required_parameters: dict, cycle_date: str):
+def run_data_quality_task(required_parameters: dict, cycle_date: str) -> None:
     dataset_id = required_parameters["dataset_id"]
     logging.info("Start applying data quality rules on the dataset %s", dataset_id)
     dq_check_results = dqc.apply_dq_rules(dataset_id=dataset_id, cycle_date=cycle_date)
@@ -82,7 +82,7 @@ def run_data_quality_task(required_parameters: dict, cycle_date: str):
     logging.info(dq_check_results)
 
 
-def run_data_quality_ml_task(required_parameters: dict, cycle_date: str):
+def run_data_quality_ml_task(required_parameters: dict, cycle_date: str) -> None:
     dataset_id = required_parameters["dataset_id"]
     logging.info("Started detecting anomalies in the dataset %s", dataset_id)
     column_scores = dqmlc.detect_anomalies(dataset_id=dataset_id, cycle_date=cycle_date)
@@ -93,11 +93,17 @@ def run_data_quality_ml_task(required_parameters: dict, cycle_date: str):
     logging.info("Finished detecting anomalies in the dataset %s", dataset_id)
 
 
-def run_data_profile_task(required_parameters: dict, cycle_date: str):
-    pass
+def run_data_profile_task(required_parameters: dict, cycle_date: str) -> None:
+    dataset_id = required_parameters["dataset_id"]
+    logging.info("Start profiling the dataset %s", dataset_id)
+    dp_results = dpc.apply_ner_model(dataset_id=dataset_id, cycle_date=cycle_date)
 
+    logging.info("Data profile results for dataset %s", dataset_id)
+    logging.info(dp_results)
 
-def run_data_recon_task(required_parameters: dict, cycle_date: str):
+    logging.info("Finished profiling the dataset %s", dataset_id)
+
+def run_data_recon_task(required_parameters: dict, cycle_date: str) -> None:
     dataset_id = required_parameters["dataset_id"]
     logging.info(
         "Start applying data reconciliation rules on the dataset %s", dataset_id
@@ -113,7 +119,7 @@ def run_data_recon_task(required_parameters: dict, cycle_date: str):
     logging.info(dr_check_results)
 
 
-def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
+def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) -> None:
     for task in tasks:
         if task.name == "data quality":
             run_data_quality_task(
@@ -129,7 +135,7 @@ def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
             )
 
 
-def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str):
+def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) -> None:
     for task in tasks:
         if task.name == "data reconciliation":
             run_data_recon_task(
@@ -153,7 +159,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
 
     # Run ingestion task
     logging.info("Running the ingestion task.")
-    records_loaded = run_ingestion_task(
+    run_ingestion_task(
         ingestion_task_id=ingestion_workflow.ingestion_task_id,
         cycle_date=cycle_date,
     )
