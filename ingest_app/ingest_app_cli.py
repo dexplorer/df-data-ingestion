@@ -8,7 +8,7 @@ from ingest_app import settings as sc
 from dr_app import settings as dr_sc
 from dq_app import settings as dq_sc
 from dqml_app import settings as dqml_sc
-from dp_app import settings as dp_sc 
+from dp_app import settings as dp_sc
 
 from ingest_app import ingest_app_core as dic
 from utils import logger as ufl
@@ -31,7 +31,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, env: str, cycle_date: str
     """
 
     sc.load_config(env)
-    # Override sub app config with main app cfg 
+    # Override sub app config with main app cfg
     dr_sc.APP_ROOT_DIR = sc.APP_ROOT_DIR
     dr_sc.load_config(env)
     dq_sc.APP_ROOT_DIR = sc.APP_ROOT_DIR

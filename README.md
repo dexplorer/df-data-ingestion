@@ -2,6 +2,8 @@
 
 This application runs a data ingestion workflow to ingest a delimited file into a spark table. 
 
+It runs the configured pre-ingestion (data quality checks, data profiling) and post-ingestion (data reconciliation) tasks as part of the workflow.
+
 Application can be invoked using CLI or REST API end points. This allows the app to be integrated into a larger data ingestion / distribution framework.
 
 ### Install
@@ -31,15 +33,15 @@ Application can be invoked using CLI or REST API end points. This allows the app
   ```
   ##### Invoke the API endpoint
   ```sh
-    https://<host name with port number>/run-ingestion-workflow/{ingestion_workflow_id}
-    https://<host name with port number>/run-ingestion-workflow/2
+    https://<host name with port number>/run-ingestion-workflow/?ingestion_workflow_id=<value>
+    https://<host name with port number>/run-ingestion-workflow/?ingestion_workflow_id=<value>&cycle_date=<value>
+
+    /run-ingestion-workflow/?ingestion_workflow_id=3
+    /run-ingestion-workflow/?ingestion_workflow_id=1&cycle_date=2024-12-26
   ```
   ##### Invoke the API from Swagger Docs interface
   ```sh
     https://<host name with port number>/docs
-
-    /run-ingestion-workflow/{dataset_id}
-    /run-ingestion-workflow/2
   ```
 
 ### Sample Input

@@ -10,7 +10,7 @@ from ingest_app.ingest_spark import loader as sl
 from dr_app import dr_app_core as drc
 from dq_app import dq_app_core as dqc
 from dqml_app import dqml_app_core as dqmlc
-from dp_app import dp_app_core as dpc 
+from dp_app import dp_app_core as dpc
 
 import logging
 
@@ -54,6 +54,8 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     target_database_name = tgt_dataset.database_name
     target_table_name = tgt_dataset.table_name
     partition_keys = tgt_dataset.partition_keys
+    str_schema = get_dataset_schema(dataset_id=ingestion_task.source_dataset_id)
+    load_type = ingestion_task.ingestion_pattern.load_type
 
     # Load the file
     records = sl.load_file_to_table(
@@ -63,6 +65,8 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
         target_table_name=target_table_name,
         partition_keys=partition_keys,
         cur_eff_date=cur_eff_date,
+        str_schema=str_schema,
+        load_type=load_type,
     )
 
     logging.info("%d records are loaded into %s.", records, qual_target_table_name)
@@ -102,6 +106,7 @@ def run_data_profile_task(required_parameters: dict, cycle_date: str) -> None:
     logging.info(dp_results)
 
     logging.info("Finished profiling the dataset %s", dataset_id)
+
 
 def run_data_recon_task(required_parameters: dict, cycle_date: str) -> None:
     dataset_id = required_parameters["dataset_id"]
@@ -158,7 +163,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     )
 
     # Run ingestion task
-    logging.info("Running the ingestion task.")
+    logging.info("Running the ingestion task %s.", ingestion_workflow.ingestion_task_id)
     run_ingestion_task(
         ingestion_task_id=ingestion_workflow.ingestion_task_id,
         cycle_date=cycle_date,
@@ -169,3 +174,47 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     run_post_ingestion_tasks(
         tasks=ingestion_workflow.post_ingestion_tasks, cycle_date=cycle_date
     )
+
+
+def get_dataset_schema(dataset_id: str) -> str:
+    # Specify the str schema in the format source column name, target column name, data type
+    # Capture this as part of dataset metadata.
+    # This is not needed if the spark tables are defined up front (as is the case in production).
+    str_schemas = {
+        "1": [
+            ("effective_date", "effective_date", "string"),
+            ("asset_id", "asset_id", "string"),
+            ("asset_type", "asset_type", "string"),
+            ("asset_name", "asset_name", "string"),
+        ],
+        "2": [
+            ("effective_date", "effective_date", "string"),
+            ("account_id", "account_id", "string"),
+            ("asset_id", "asset_id", "string"),
+            ("asset_value", "asset_value", "decimal(25,2)"),
+        ],
+        "3": [
+            ("effective_date", "effective_date", "string"),
+            ("first_name", "first_name", "string"),
+            ("last_name", "last_name", "string"),
+            ("full_name", "full_name", "string"),
+            ("ssn", "ssn", "string"),
+            ("dob", "dob", "string"),
+            ("street_addr1", "street_addr1", "string"),
+            ("street_addr2", "street_addr2", "string"),
+            ("city", "city", "string"),
+            ("state", "state", "string"),
+            ("country", "country", "string"),
+        ],
+    }
+
+    try:
+        if dataset_id in str_schemas:
+            str_schema_for_dataset = str_schemas[dataset_id]
+        else:
+            raise ValueError("Schema is not defined for the dataset.")
+    except ValueError as error:
+        logging.error(error)
+        raise
+
+    return str_schema_for_dataset
