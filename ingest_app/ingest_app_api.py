@@ -80,7 +80,7 @@ if __name__ == "__main__":
     dr_sc.load_config(env)
     dq_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dq_sc.load_config(env)
-    dqml_sc.APP_ROOT_DIR = scg.APP_ROOT_DIR
+    dqml_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dqml_sc.load_config(env)
     dp_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dp_sc.load_config(env)
