@@ -6,9 +6,12 @@ from ingest_app.settings import ConfigParms as sc
 from ingest_app import settings as scg
 
 # Needed to pass the cfg from main app to sub app
-from dr_app import settings as dr_sc
-from dq_app import settings as dq_sc
-from dqml_app import settings as dqml_sc
+from dr_app.settings import ConfigParms as dr_sc
+from dr_app import settings as dr_scg
+from dq_app.settings import ConfigParms as dq_sc
+from dq_app import settings as dq_scg
+from dqml_app.settings import ConfigParms as dqml_sc
+from dqml_app import settings as dqml_scg
 from dp_app.settings import ConfigParms as dp_sc
 from dp_app import settings as dp_scg
 
@@ -73,9 +76,9 @@ if __name__ == "__main__":
 
     sc.load_config(env)
     # Override sub app config with main app cfg
-    dr_sc.APP_ROOT_DIR = scg.APP_ROOT_DIR
+    dr_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dr_sc.load_config(env)
-    dq_sc.APP_ROOT_DIR = scg.APP_ROOT_DIR
+    dq_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dq_sc.load_config(env)
     dqml_sc.APP_ROOT_DIR = scg.APP_ROOT_DIR
     dqml_sc.load_config(env)
