@@ -2,9 +2,9 @@ from pyspark.sql import SparkSession, DataFrame
 
 # from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 from pyspark.sql import types as T
-from pyspark.sql.functions import col
+# from pyspark.sql.functions import col
 
-from ingest_app import settings as sc
+from ingest_app.settings import ConfigParms as sc
 
 import logging
 
@@ -57,7 +57,7 @@ def derive_struct_schema_from_str(str_schema: str) -> T.StructType:
         if str_type == "string":
             struct_type = "StringType()"
         elif str_type.startswith("decimal"):
-            prefix, match, suffix = str_type.rpartition("(")
+            _, match, suffix = str_type.rpartition("(")
             precision_scale = f"{match}{suffix}"
             struct_type = f"DecimalType{precision_scale}"
 
@@ -104,8 +104,6 @@ def write_spark_dataframe(
     partition_keys: list[str],
     load_type: str,
 ):
-    # Write data partitioned by year and month
-    # df.write.partitionBy("year", "month").mode("overwrite").format("parquet").save("/workspaces/df-data-ingestion/ingest_app/data/output/")
 
     # df.write \
     # .partitionBy("effective_date") \
@@ -124,10 +122,6 @@ def write_spark_dataframe(
 
     # Check if table exists
     if spark.catalog.tableExists(tableName=qual_target_table_name):
-        logging.info(
-            "Table %s exists. Insert/overwrite the partition.", qual_target_table_name
-        )
-
         # Get the target table columns list. Use this to arrange the source dataframe such that the partition keys are at the end of the list.
         target_table_columns = spark.catalog.listColumns(
             tableName=qual_target_table_name
@@ -215,11 +209,11 @@ def validate_load(
 
     if source_record_count == target_record_count:
         logging.info(
-            f"Load is successful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}"
+            "Load is successful. Source Record Count = %d, Target Record Count = %d", source_record_count, target_record_count
         )
     else:
         logging.error(
-            f"Load is unsuccessful. Source Record Count = {source_record_count}, Target Record Count = {target_record_count}"
+            "Load is unsuccessful. Source Record Count = %d, Target Record Count = %d", source_record_count, target_record_count
         )
 
     return target_record_count
@@ -239,7 +233,6 @@ def load_file_to_table(
     source_file_path: str,
     qual_target_table_name: str,
     target_database_name: str,
-    target_table_name: str,
     partition_keys: list[str],
     cur_eff_date: str,
     str_schema: str,

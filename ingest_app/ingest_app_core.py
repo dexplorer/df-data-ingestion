@@ -3,7 +3,7 @@ from app_calendar import eff_date as ed
 from metadata import ingestion_workflow as iw
 from metadata import ingestion_task as it
 
-from ingest_app import settings as sc
+from ingest_app.settings import ConfigParms as sc
 from ingest_app.ingest_spark import loader as sl
 
 # Replace this with a API call in test/prod env
@@ -52,7 +52,6 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
 
     qual_target_table_name = tgt_dataset.get_qualified_table_name()
     target_database_name = tgt_dataset.database_name
-    target_table_name = tgt_dataset.table_name
     partition_keys = tgt_dataset.partition_keys
     str_schema = get_dataset_schema(dataset_id=ingestion_task.source_dataset_id)
     load_type = ingestion_task.ingestion_pattern.load_type
@@ -62,7 +61,6 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
         source_file_path=source_file_path,
         qual_target_table_name=qual_target_table_name,
         target_database_name=target_database_name,
-        target_table_name=target_table_name,
         partition_keys=partition_keys,
         cur_eff_date=cur_eff_date,
         str_schema=str_schema,

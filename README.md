@@ -29,7 +29,7 @@ Application can be invoked using CLI or REST API end points. This allows the app
 - **Run a ingestion workflow via API**:
   ##### Start the API server
   ```sh
-    python ingest_app/ingest_app_api.py
+    python ingest_app/ingest_app_api.py --env "dev"
   ```
   ##### Invoke the API endpoint
   ```sh

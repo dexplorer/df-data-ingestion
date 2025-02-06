@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="ingest_app",
-    version="1.0.0",
+    version="1.0.1",
     scripts=["./scripts/ingest_app"],
     author="Rajakumaran Arivumani",
     description="Data ingestion app install.",
@@ -22,7 +22,7 @@ setuptools.setup(
         "dr_app@git+https://github.com/dexplorer/df-data-recon#egg=dr_app-1.0.0",
         "dq_app@git+https://github.com/dexplorer/df-data-quality#egg=dq_app-1.0.1",
         "dqml_app@git+https://github.com/dexplorer/df-data-quality-ml#egg=dqml_app-1.0.2",
-        "dp_app@git+https://github.com/dexplorer/df-data-profile#egg=dp_app-1.0.1",
+        "dp_app@git+https://github.com/dexplorer/df-data-profile#egg=dp_app-1.0.2",
     ],
     python_requires=">=3.12",
 )
