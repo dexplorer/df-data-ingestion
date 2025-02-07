@@ -40,9 +40,7 @@ async def root():
 
 
 @app.get("/run-ingestion-workflow/")
-async def run_ingestion_workflow(
-    ingestion_workflow_id: str, cycle_date: str = ""
-):
+async def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str = ""):
     """
     Runs the ingestion workflow.
 

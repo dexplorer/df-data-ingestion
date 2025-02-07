@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession, DataFrame
 
 # from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 from pyspark.sql import types as T
+
 # from pyspark.sql.functions import col
 
 from ingest_app.settings import ConfigParms as sc
@@ -209,11 +210,15 @@ def validate_load(
 
     if source_record_count == target_record_count:
         logging.info(
-            "Load is successful. Source Record Count = %d, Target Record Count = %d", source_record_count, target_record_count
+            "Load is successful. Source Record Count = %d, Target Record Count = %d",
+            source_record_count,
+            target_record_count,
         )
     else:
         logging.error(
-            "Load is unsuccessful. Source Record Count = %d, Target Record Count = %d", source_record_count, target_record_count
+            "Load is unsuccessful. Source Record Count = %d, Target Record Count = %d",
+            source_record_count,
+            target_record_count,
         )
 
     return target_record_count

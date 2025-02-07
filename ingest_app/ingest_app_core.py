@@ -1,6 +1,6 @@
 from metadata import dataset as ds
 from app_calendar import eff_date as ed
-from metadata import ingestion_workflow as iw
+from metadata import workflow as iw
 from metadata import ingestion_task as it
 
 from ingest_app.settings import ConfigParms as sc
@@ -151,14 +151,12 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     # Simulate getting the ingestion workflow metadata from API
     logging.info("Get ingestion workflow metadata")
     ingestion_workflow = iw.IngestionWorkflow.from_json(
-        ingestion_workflow_id=ingestion_workflow_id
+        workflow_id=ingestion_workflow_id, workflow_kind="ingestion"
     )
 
     # Run pre-ingestion tasks
     logging.info("Running the pre-ingestion tasks.")
-    run_pre_ingestion_tasks(
-        tasks=ingestion_workflow.pre_ingestion_tasks, cycle_date=cycle_date
-    )
+    run_pre_ingestion_tasks(tasks=ingestion_workflow.pre_tasks, cycle_date=cycle_date)
 
     # Run ingestion task
     logging.info("Running the ingestion task %s.", ingestion_workflow.ingestion_task_id)
@@ -169,9 +167,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
 
     # Run post-ingestion tasks
     logging.info("Running the post-ingestion tasks.")
-    run_post_ingestion_tasks(
-        tasks=ingestion_workflow.post_ingestion_tasks, cycle_date=cycle_date
-    )
+    run_post_ingestion_tasks(tasks=ingestion_workflow.post_tasks, cycle_date=cycle_date)
 
 
 def get_dataset_schema(dataset_id: str) -> str:
