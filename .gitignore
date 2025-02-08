@@ -175,5 +175,4 @@ metastore_db/
 derby.log
 
 # Hive warehouse
-ingest_app/data/user/hive/warehouse
-derby.log
+data/user/hive/warehouse

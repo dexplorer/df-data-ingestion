@@ -47,9 +47,6 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
         src_dataset.resolve_file_path(cur_eff_date_yyyymmdd)
     )
 
-    # source_file_path = "/workspaces/df-data-ingestion/ingest_app/data/acct_positions_20241226.csv"
-    # target_file_path = "/workspaces/df-data-ingestion/ingest_app/data/output/tacct_position"
-
     qual_target_table_name = tgt_dataset.get_qualified_table_name()
     target_database_name = tgt_dataset.database_name
     partition_keys = tgt_dataset.partition_keys

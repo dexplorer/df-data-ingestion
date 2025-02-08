@@ -11,25 +11,24 @@ Application can be invoked using CLI or REST API end points. This allows the app
 - **Install via Makefile and pip**:
   ```
     make install
-    make setup
   ```
 
 ### Usage Examples
 
 - **Run a ingestion workflow via CLI**:
   ```sh
-    ingest_app run-ingestion-workflow --ingestion_workflow_id "2" --env "dev"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "2" --env "dev"
   ```
 
 - **Run a ingestion workflow via CLI with cycle date override**:
   ```sh
-    ingest_app run-ingestion-workflow --ingestion_workflow_id "2" --env "dev" --cycle_date "2024-12-24"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "2" --env "dev" --cycle_date "2024-12-24"
   ```
 
 - **Run a ingestion workflow via API**:
   ##### Start the API server
   ```sh
-    python ingest_app/ingest_app_api.py --env "dev"
+    ingest-app-api --env "dev"
   ```
   ##### Invoke the API endpoint
   ```sh

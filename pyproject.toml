@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools >= 64.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ingest_app"
+version = "0.0.1"
+authors = [
+  { name="Rajakumaran Arivumani", email="author@example.com" },
+]
+description = "Data ingestion app package"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+#license = "MIT"
+#license-files = ["LICEN[CS]E*"]
+dependencies = [
+  # standard py app specific
+  "confuse",
+  # app specific 
+  "pyspark == 3.5.4",
+  "python-dateutil",
+  "pandas == 2.1.4",
+  "datetime",
+  "xgboost == 2.1.4",
+  "scikit-learn[model_selection]",
+  "scikit-learn[pre_processing]",
+  "shap == 0.46.0",
+  "matplotlib == 3.10.0",
+  "requests", 
+  # my packages
+  "utils @ git+https://github.com/dexplorer/utils",
+  "metadata @ git+https://github.com/dexplorer/df-metadata",
+  "app_calendar @ git+https://github.com/dexplorer/df-app-calendar",
+  "dq_app @ git+https://github.com/dexplorer/df-data-quality.git@v0.0.1",
+  "dqml_app @ git+https://github.com/dexplorer/df-data-quality-ml.git@v0.0.1",
+  "dp_app @ git+https://github.com/dexplorer/df-data-profile",
+  "dr_app @ git+https://github.com/dexplorer/df-data-recon",
+]
+keywords = ["data", "ingestion", "etl", "elt", "framework", "load"]
+
+[project.optional-dependencies]
+api = [
+  "fastapi" , 
+  "uvicorn[standard]", 
+  ]
+cli = [
+  "click",
+]
+test = [
+  # standard dev tools
+  "pytest",
+  "pytest-cov",
+  "pylint",
+  "black",
+  "ipython",
+]
+
+[project.scripts]
+ingest-app-cli = "ingest_app.ingest_app_cli:main"
+ingest-app-api = "ingest_app.ingest_app_api:main"
+
+[project.urls]
+Homepage = "https://profile.rajakumaran.in"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com/dexplorer/df-data-distribution.git"
+Issues = "https://github.com/dexplorer/df-data-distribution/issues"
+Changelog = "https://github.com/dexplorer/df-data-distribution/blob/master/CHANGELOG.md"

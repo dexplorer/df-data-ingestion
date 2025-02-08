@@ -61,7 +61,7 @@ async def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str = "
     return {"return_code": 0}
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Data Ingestion Application")
     parser.add_argument(
         "-e", "--env", help="Environment", const="dev", nargs="?", default="dev"
@@ -97,3 +97,7 @@ if __name__ == "__main__":
     )
 
     logging.info("Stopping the API service")
+
+
+if __name__ == "__main__":
+    main()

@@ -2,8 +2,7 @@ import confuse
 
 import logging
 
-# global APP_ROOT_DIR
-APP_ROOT_DIR = "/workspaces/df-data-ingestion/ingest_app"
+APP_ROOT_DIR = "/workspaces/df-data-ingestion"
 
 
 class ConfigParms:
@@ -36,14 +35,8 @@ class ConfigParms:
         logging.info(cfg)
 
         cls.cfg_file_path = f"{cls.resolve_app_path(cfg['cfg_file_path'])}"
-
-        # global log_file_path
         cls.log_file_path = f"{cls.resolve_app_path(cfg['log_file_path'])}"
-
-        # global source_file_path
         cls.source_file_path = f"{cls.resolve_app_path(cfg['source_file_path'])}"
-
-        # global warehouse_path
         cls.warehouse_path = f"{cls.resolve_app_path(cfg['warehouse_path'])}"
 
     @staticmethod

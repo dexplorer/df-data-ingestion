@@ -19,8 +19,13 @@ from ingest_app import ingest_app_core as dic
 from utils import logger as ufl
 
 
-@click.command()
-# @click.argument('ingest_workflow_id', required=1)
+# Create command group
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.option(
     "--ingestion_workflow_id",
     type=str,
@@ -55,16 +60,6 @@ def run_ingestion_workflow(ingestion_workflow_id: str, env: str, cycle_date: str
         ingestion_workflow_id=ingestion_workflow_id, cycle_date=cycle_date
     )
     logging.info("Finished running the ingestion workflow %s", ingestion_workflow_id)
-
-
-# Create command group
-@click.group()
-def cli():
-    pass
-
-
-# Add sub command to group
-cli.add_command(run_ingestion_workflow)
 
 
 def main():
