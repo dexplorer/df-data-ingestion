@@ -3,7 +3,7 @@ from app_calendar import eff_date as ed
 from metadata import workflow as iw
 from metadata import ingestion_task as it
 
-from ingest_app.settings import ConfigParms as sc
+from config.settings import ConfigParms as sc
 from ingest_app.ingest_spark import loader as sl
 
 # Replace this with a API call in test/prod env

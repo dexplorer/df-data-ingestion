@@ -5,7 +5,7 @@ from pyspark.sql import types as T
 
 # from pyspark.sql.functions import col
 
-from ingest_app.settings import ConfigParms as sc
+from config.settings import ConfigParms as sc
 
 import logging
 
@@ -243,7 +243,7 @@ def load_file_to_table(
     str_schema: str,
     load_type: str,
 ):
-    spark = create_spark_session(warehouse_path=sc.warehouse_path)
+    spark = create_spark_session(warehouse_path=sc.hive_warehouse_path)
     # schema = define_file_schema()
     schema = derive_struct_schema_from_str(str_schema=str_schema)
     df = create_spark_dataframe(

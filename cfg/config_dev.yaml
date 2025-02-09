@@ -1,9 +1,10 @@
 appName: ingest_app
 logLevel: INFO
 CONFIG:
-  cfg_file_path: "APP_ROOT_DIR/cfg"
-  log_file_path: "APP_ROOT_DIR/log"
-  source_file_path: "APP_ROOT_DIR/data"
-  warehouse_path: "APP_ROOT_DIR/data/user/hive/warehouse"
-  plot_path: "APP_ROOT_DIR/plot"
-  
+  APP_CONFIG_DIR: "APP_ROOT_DIR/cfg"
+  APP_LOG_DIR: "APP_ROOT_DIR/log"
+  APP_DATA_IN_DIR: "APP_ROOT_DIR/data/in"
+  APP_DATA_OUT_DIR: "APP_ROOT_DIR/data/out"
+  APP_SQL_SCRIPT_DIR: "APP_ROOT_DIR/sql"
+  APP_IMG_OUT_DIR: "APP_ROOT_DIR/plot"
+  HIVE_WAREHOUSE_DIR: "APP_ROOT_DIR/data/user/hive/warehouse"

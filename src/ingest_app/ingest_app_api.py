@@ -2,16 +2,18 @@ import os
 import argparse
 import logging
 
-from ingest_app.settings import ConfigParms as sc
-from ingest_app import settings as scg
+# from ingest_app.settings import ConfigParms as sc
+# from ingest_app import settings as scg
+from config.settings import ConfigParms as sc
+from config import settings as scg
 
 # Needed to pass the cfg from main app to sub app
 from dr_app.settings import ConfigParms as dr_sc
 from dr_app import settings as dr_scg
-from dq_app.settings import ConfigParms as dq_sc
-from dq_app import settings as dq_scg
-from dqml_app.settings import ConfigParms as dqml_sc
-from dqml_app import settings as dqml_scg
+# from dq_app.settings import ConfigParms as dq_sc
+# from dq_app import settings as dq_scg
+# from dqml_app.settings import ConfigParms as dqml_sc
+# from dqml_app import settings as dqml_scg
 from dp_app.settings import ConfigParms as dp_sc
 from dp_app import settings as dp_scg
 
@@ -20,6 +22,9 @@ from utils import logger as ufl
 
 from fastapi import FastAPI
 import uvicorn
+
+#
+APP_ROOT_DIR = "/workspaces/df-data-ingestion"
 
 app = FastAPI()
 
@@ -72,15 +77,16 @@ def main():
     logging.info(args)
     env = args["env"]
 
+    scg.APP_ROOT_DIR = APP_ROOT_DIR
     sc.load_config(env)
     # Override sub app config with main app cfg
-    dr_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
+    dr_scg.APP_ROOT_DIR = APP_ROOT_DIR
     dr_sc.load_config(env)
-    dq_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
-    dq_sc.load_config(env)
-    dqml_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
-    dqml_sc.load_config(env)
-    dp_scg.APP_ROOT_DIR = scg.APP_ROOT_DIR
+    # dq_scg.APP_ROOT_DIR = APP_ROOT_DIR
+    # dq_sc.load_config(env)
+    # dqml_scg.APP_ROOT_DIR = APP_ROOT_DIR
+    # dqml_sc.load_config(env)
+    dp_scg.APP_ROOT_DIR = APP_ROOT_DIR
     dp_sc.load_config(env)
 
     script_name = os.path.splitext(os.path.basename(__file__))[0]

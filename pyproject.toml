@@ -18,8 +18,6 @@ classifiers = [
 #license = "MIT"
 #license-files = ["LICEN[CS]E*"]
 dependencies = [
-  # standard py app specific
-  "confuse",
   # app specific 
   "pyspark == 3.5.4",
   "python-dateutil",
@@ -35,8 +33,8 @@ dependencies = [
   "utils @ git+https://github.com/dexplorer/utils",
   "metadata @ git+https://github.com/dexplorer/df-metadata",
   "app_calendar @ git+https://github.com/dexplorer/df-app-calendar",
-  "dq_app @ git+https://github.com/dexplorer/df-data-quality.git@v0.0.1",
-  "dqml_app @ git+https://github.com/dexplorer/df-data-quality-ml.git@v0.0.1",
+  "dq_app @ git+https://github.com/dexplorer/df-data-quality",
+  "dqml_app @ git+https://github.com/dexplorer/df-data-quality-ml",
   "dp_app @ git+https://github.com/dexplorer/df-data-profile",
   "dr_app @ git+https://github.com/dexplorer/df-data-recon",
 ]
