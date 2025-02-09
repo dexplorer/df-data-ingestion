@@ -15,6 +15,34 @@ from dp_app import dp_app_core as dpc
 import logging
 
 
+def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
+    # Simulate getting the cycle date from API
+    # Run this from the parent app
+    if not cycle_date:
+        cycle_date = ed.get_cur_cycle_date()
+
+    # Simulate getting the ingestion workflow metadata from API
+    logging.info("Get ingestion workflow metadata")
+    ingestion_workflow = iw.IngestionWorkflow.from_json(
+        workflow_id=ingestion_workflow_id, workflow_kind="ingestion"
+    )
+
+    # Run pre-ingestion tasks
+    logging.info("Running the pre-ingestion tasks.")
+    run_pre_ingestion_tasks(tasks=ingestion_workflow.pre_tasks, cycle_date=cycle_date)
+
+    # Run ingestion task
+    logging.info("Running the ingestion task %s.", ingestion_workflow.ingestion_task_id)
+    run_ingestion_task(
+        ingestion_task_id=ingestion_workflow.ingestion_task_id,
+        cycle_date=cycle_date,
+    )
+
+    # Run post-ingestion tasks
+    logging.info("Running the post-ingestion tasks.")
+    run_post_ingestion_tasks(tasks=ingestion_workflow.post_tasks, cycle_date=cycle_date)
+
+
 def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     # Simulate getting the ingestion task metadata from API
     logging.info("Get ingestion task metadata")
@@ -141,30 +169,6 @@ def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) ->
             run_data_recon_task(
                 required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-
-
-def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
-
-    # Simulate getting the ingestion workflow metadata from API
-    logging.info("Get ingestion workflow metadata")
-    ingestion_workflow = iw.IngestionWorkflow.from_json(
-        workflow_id=ingestion_workflow_id, workflow_kind="ingestion"
-    )
-
-    # Run pre-ingestion tasks
-    logging.info("Running the pre-ingestion tasks.")
-    run_pre_ingestion_tasks(tasks=ingestion_workflow.pre_tasks, cycle_date=cycle_date)
-
-    # Run ingestion task
-    logging.info("Running the ingestion task %s.", ingestion_workflow.ingestion_task_id)
-    run_ingestion_task(
-        ingestion_task_id=ingestion_workflow.ingestion_task_id,
-        cycle_date=cycle_date,
-    )
-
-    # Run post-ingestion tasks
-    logging.info("Running the post-ingestion tasks.")
-    run_post_ingestion_tasks(tasks=ingestion_workflow.post_tasks, cycle_date=cycle_date)
 
 
 def get_dataset_schema(dataset_id: str) -> str:
