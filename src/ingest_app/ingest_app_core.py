@@ -21,6 +21,9 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     if not cycle_date:
         cycle_date = ed.get_cur_cycle_date()
 
+    logging.info("***CFG***")
+    logging.info(sc.config["CONFIG"].get())
+
     # Simulate getting the ingestion workflow metadata from API
     logging.info("Get ingestion workflow metadata")
     ingestion_workflow = iw.IngestionWorkflow.from_json(
