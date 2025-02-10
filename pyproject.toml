@@ -20,15 +20,6 @@ classifiers = [
 dependencies = [
   # app specific 
   "pyspark == 3.5.4",
-  "python-dateutil",
-  "pandas == 2.1.4",
-  "datetime",
-  "xgboost == 2.1.4",
-  "scikit-learn[model_selection]",
-  "scikit-learn[pre_processing]",
-  "shap == 0.46.0",
-  "matplotlib == 3.10.0",
-  "requests", 
   # my packages
   "utils @ git+https://github.com/dexplorer/utils",
   "metadata @ git+https://github.com/dexplorer/df-metadata",
