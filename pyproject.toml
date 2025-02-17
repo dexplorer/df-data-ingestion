@@ -28,6 +28,7 @@ dependencies = [
   "dqml_app @ git+https://github.com/dexplorer/df-data-quality-ml",
   "dp_app @ git+https://github.com/dexplorer/df-data-profile",
   "dr_app @ git+https://github.com/dexplorer/df-data-recon",
+  "dl_app @ git+https://github.com/dexplorer/df-data-lineage",
 ]
 keywords = ["data", "ingestion", "etl", "elt", "framework", "load"]
 

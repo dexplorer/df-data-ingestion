@@ -1,8 +1,8 @@
 install: pyproject.toml
 	pip install --upgrade pip &&\
-	pip install --editable . 
-	pip install .[cli] 
-	pip install .[api] 
+	pip install --editable . &&\
+	pip install .[cli] &&\
+	pip install .[api] &&\
 	pip install .[test]
 
 lint:

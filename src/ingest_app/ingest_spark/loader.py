@@ -5,6 +5,8 @@ from pyspark.sql import types as T
 
 # from pyspark.sql.functions import col
 
+import importlib
+
 from config.settings import ConfigParms as sc
 
 import logging
@@ -40,33 +42,40 @@ def create_spark_session(warehouse_path) -> SparkSession:
 
 # def derive_struct_schema_from_str(spark: SparkSession, json_str: str) -> StructType:
 #     from pyspark.sql.functions import schema_of_json, lit
-
 #     # json_str = """{"effective_date":"2024-12-26","account_id":"ACC1","asset_id":"1","asset_value":12345678901234567890123.12}"""
-
 #     struct_schema = spark.range(1).select(schema_of_json(lit(json_str))).collect()[0][0]
-
 #     return struct_schema
 
 
 def derive_struct_schema_from_str(str_schema: str) -> T.StructType:
+    mod_name = "pyspark.sql.types"
+    mod = importlib.import_module(mod_name)
+
     str_schema_resolved = []
     for schema_row in str_schema:
         col_name = schema_row[1]
         str_type = schema_row[2]
 
-        struct_type = "StringType()"
-        if str_type == "string":
-            struct_type = "StringType()"
-        elif str_type.startswith("decimal"):
-            _, match, suffix = str_type.rpartition("(")
-            precision_scale = f"{match}{suffix}"
-            struct_type = f"DecimalType{precision_scale}"
+        struct_type = 'StringType'
+        struct_type_func = getattr(mod, struct_type)()
+        if str_type.startswith('decimal'):
+            _, match, suffix = str_type.rpartition('(')
+            # precision_scale = f"{match}{suffix}"
+            # struct_type = f"DecimalType{precision_scale}"
+            precision, match, scale = suffix.replace(')', '').rpartition(',')
+            struct_type = 'DecimalType'
+            if precision and scale:
+                struct_type_func = getattr(mod, struct_type)(int(precision), int(scale))
+            else:
+                struct_type_func = getattr(mod, struct_type)()
 
-        new_schema = (col_name, struct_type, True)
+        new_schema = (col_name, struct_type_func, True)
         str_schema_resolved.append(new_schema)
 
     struct_schema = T.StructType(
-        [T.StructField(f[0], eval(f"T.{f[1]}"), f[2]) for f in str_schema_resolved]
+        # [T.StructField(f[0], eval(f"T.{f[1]}"), f[2]) for f in str_schema_resolved]
+        # [T.StructField(f[0], getattr(mod, f[1])(), f[2]) for f in str_schema_resolved]
+        [T.StructField(f[0], f[1], f[2]) for f in str_schema_resolved]
     )
     # In myScstr_schema_resolvedhema, the Spark type is provided as string.
     # Using eval makes that string to be evaluated as a method of types module.

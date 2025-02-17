@@ -1,7 +1,8 @@
 from metadata import dataset as ds
 from app_calendar import eff_date as ed
 from metadata import workflow as iw
-from metadata import ingestion_task as it
+from metadata import integration_task as it
+from metadata import dataset_schema as dh
 
 from config.settings import ConfigParms as sc
 from ingest_app.ingest_spark import loader as sl
@@ -11,6 +12,7 @@ from dr_app import dr_app_core as drc
 from dq_app import dq_app_core as dqc
 from dqml_app import dqml_app_core as dqmlc
 from dp_app import dp_app_core as dpc
+from dl_app import dl_app_core as dlc
 
 import logging
 
@@ -27,7 +29,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     # Simulate getting the ingestion workflow metadata from API
     logging.info("Get ingestion workflow metadata")
     ingestion_workflow = iw.IngestionWorkflow.from_json(
-        workflow_id=ingestion_workflow_id, workflow_kind="ingestion"
+        workflow_id=ingestion_workflow_id
     )
 
     # Run pre-ingestion tasks
@@ -45,23 +47,26 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     logging.info("Running the post-ingestion tasks.")
     run_post_ingestion_tasks(tasks=ingestion_workflow.post_tasks, cycle_date=cycle_date)
 
+    # Data lineage is required for all workflows
+    run_data_lineage_task(workflow_id=ingestion_workflow_id, cycle_date=cycle_date)
+
 
 def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     # Simulate getting the ingestion task metadata from API
     logging.info("Get ingestion task metadata")
-    ingestion_task = it.IngestionTask.from_json(ingestion_task_id=ingestion_task_id)
+    ingestion_task = it.IngestionTask.from_json(task_id=ingestion_task_id)
 
     # Simulate getting the source dataset metadata from API
     logging.info("Get source dataset metadata")
     src_dataset = []
-    if ingestion_task.ingestion_pattern.source_type == ds.DatasetKind.LOCAL_DELIM_FILE:
+    if ingestion_task.ingestion_pattern.source_type == ds.DatasetType.LOCAL_DELIM_FILE:
         src_dataset = ds.LocalDelimFileDataset.from_json(
             dataset_id=ingestion_task.source_dataset_id
         )
 
     logging.info("Get target dataset metadata")
     tgt_dataset = []
-    if ingestion_task.ingestion_pattern.target_type == ds.DatasetKind.SPARK_TABLE:
+    if ingestion_task.ingestion_pattern.target_type == ds.DatasetType.SPARK_TABLE:
         tgt_dataset = ds.SparkTableDataset.from_json(
             dataset_id=ingestion_task.target_dataset_id
         )
@@ -150,6 +155,22 @@ def run_data_recon_task(required_parameters: dict, cycle_date: str) -> None:
     logging.info(dr_check_results)
 
 
+def run_data_lineage_task(workflow_id: str, cycle_date: str) -> None:
+    logging.info(
+        "Start capturing data lineage relationships forn the workflow %s", workflow_id
+    )
+    dl_relationships = dlc.capture_relationships(
+        workflow_id=workflow_id, cycle_date=cycle_date
+    )
+
+    logging.info(
+        "Finished capturing data lineage relationships for the workflow %s", workflow_id
+    )
+
+    logging.info("Data lineage relationships for the workflow %s", workflow_id)
+    logging.info(dl_relationships)
+
+
 def run_pre_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) -> None:
     for task in tasks:
         if task.name == "data quality":
@@ -215,4 +236,11 @@ def get_dataset_schema(dataset_id: str) -> str:
         logging.error(error)
         raise
 
+    return str_schema_for_dataset
+
+
+def get_str_schema_from_metadata(dataset_id: str):
+    # Simulate getting the ingestion task metadata from API
+    logging.info("Get dataset schema metadata")
+    str_schema_for_dataset = dh.DatasetSchema.from_json(dataset_id=dataset_id)
     return str_schema_for_dataset
