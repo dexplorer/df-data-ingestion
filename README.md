@@ -8,6 +8,8 @@ Also, it runs the data lineage task to capture the relationships. This is not op
 
 Application can be invoked using CLI or REST API end points. This allows the app to be integrated into a larger data ingestion / distribution framework.
 
+![Data Ingestion Pipeline](docs/df-data-ingestion.png?raw=true "Data Ingestion Pipeline")
+
 ### Install
 
 - **Install via Makefile and pip**:
