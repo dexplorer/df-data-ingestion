@@ -196,48 +196,48 @@ def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) ->
             )
 
 
-def get_dataset_schema(dataset_id: str) -> str:
-    # Specify the str schema in the format source column name, target column name, data type
-    # Capture this as part of dataset metadata.
-    # This is not needed if the spark tables are defined up front (as is the case in production).
-    str_schemas = {
-        "1": [
-            ("effective_date", "effective_date", "string"),
-            ("asset_id", "asset_id", "string"),
-            ("asset_type", "asset_type", "string"),
-            ("asset_name", "asset_name", "string"),
-        ],
-        "2": [
-            ("effective_date", "effective_date", "string"),
-            ("account_id", "account_id", "string"),
-            ("asset_id", "asset_id", "string"),
-            ("asset_value", "asset_value", "decimal(25,2)"),
-        ],
-        "3": [
-            ("effective_date", "effective_date", "string"),
-            ("first_name", "first_name", "string"),
-            ("last_name", "last_name", "string"),
-            ("full_name", "full_name", "string"),
-            ("ssn", "ssn", "string"),
-            ("dob", "dob", "string"),
-            ("street_addr1", "street_addr1", "string"),
-            ("street_addr2", "street_addr2", "string"),
-            ("city", "city", "string"),
-            ("state", "state", "string"),
-            ("country", "country", "string"),
-        ],
-    }
+# def get_dataset_schema(dataset_id: str) -> str:
+#     # Specify the str schema in the format source column name, target column name, data type
+#     # Capture this as part of dataset metadata.
+#     # This is not needed if the spark tables are defined up front (as is the case in production).
+#     str_schemas = {
+#         "1": [
+#             ("effective_date", "effective_date", "string"),
+#             ("asset_id", "asset_id", "string"),
+#             ("asset_type", "asset_type", "string"),
+#             ("asset_name", "asset_name", "string"),
+#         ],
+#         "2": [
+#             ("effective_date", "effective_date", "string"),
+#             ("account_id", "account_id", "string"),
+#             ("asset_id", "asset_id", "string"),
+#             ("asset_value", "asset_value", "decimal(25,2)"),
+#         ],
+#         "3": [
+#             ("effective_date", "effective_date", "string"),
+#             ("first_name", "first_name", "string"),
+#             ("last_name", "last_name", "string"),
+#             ("full_name", "full_name", "string"),
+#             ("ssn", "ssn", "string"),
+#             ("dob", "dob", "string"),
+#             ("street_addr1", "street_addr1", "string"),
+#             ("street_addr2", "street_addr2", "string"),
+#             ("city", "city", "string"),
+#             ("state", "state", "string"),
+#             ("country", "country", "string"),
+#         ],
+#     }
 
-    try:
-        if dataset_id in str_schemas:
-            str_schema_for_dataset = str_schemas[dataset_id]
-        else:
-            raise ValueError("Schema is not defined for the dataset.")
-    except ValueError as error:
-        logging.error(error)
-        raise
+#     try:
+#         if dataset_id in str_schemas:
+#             str_schema_for_dataset = str_schemas[dataset_id]
+#         else:
+#             raise ValueError("Schema is not defined for the dataset.")
+#     except ValueError as error:
+#         logging.error(error)
+#         raise
 
-    return str_schema_for_dataset
+#     return str_schema_for_dataset
 
 
 def get_str_schema_from_metadata(dataset_id: str):
