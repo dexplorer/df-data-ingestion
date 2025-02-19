@@ -86,7 +86,8 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     qual_target_table_name = tgt_dataset.get_qualified_table_name()
     target_database_name = tgt_dataset.database_name
     partition_keys = tgt_dataset.partition_keys
-    str_schema = get_dataset_schema(dataset_id=ingestion_task.source_dataset_id)
+    # str_schema = get_dataset_schema(dataset_id=ingestion_task.source_dataset_id)
+    str_schema = get_str_schema_from_metadata(dataset_id=ingestion_task.target_dataset_id)
     load_type = ingestion_task.ingestion_pattern.load_type
 
     # Load the file
@@ -242,5 +243,6 @@ def get_dataset_schema(dataset_id: str) -> str:
 def get_str_schema_from_metadata(dataset_id: str):
     # Simulate getting the ingestion task metadata from API
     logging.info("Get dataset schema metadata")
-    str_schema_for_dataset = dh.DatasetSchema.from_json(dataset_id=dataset_id)
-    return str_schema_for_dataset
+    dataset_schema = dh.DatasetSchema.from_json(dataset_id=dataset_id)
+    str_schema = dataset_schema.schema
+    return str_schema

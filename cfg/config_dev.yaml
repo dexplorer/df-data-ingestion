@@ -7,4 +7,5 @@ CONFIG:
   APP_DATA_OUT_DIR: "APP_ROOT_DIR/data/out"
   APP_SQL_SCRIPT_DIR: "APP_ROOT_DIR/sql"
   APP_IMG_OUT_DIR: "APP_ROOT_DIR/plot"
-  HIVE_WAREHOUSE_DIR: "APP_ROOT_DIR/data/user/hive/warehouse"
+  HIVE_WAREHOUSE_DIR_OLD: "APP_ROOT_DIR/data/user/hive/warehouse"
+  HIVE_WAREHOUSE_DIR: "APP_ROOT_DIR/spark-warehouse"
