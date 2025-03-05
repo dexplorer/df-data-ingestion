@@ -6,6 +6,8 @@ from metadata import dataset_schema as dh
 
 from config.settings import ConfigParms as sc
 from ingest_app.ingest_spark import loader as sl
+from ingest_app.ingest_spark import create_session as cs
+from pyspark.sql import SparkSession
 
 # Replace this with a API call in test/prod env
 from dr_app import dr_app_core as drc
@@ -29,6 +31,9 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
         workflow_id=ingestion_workflow_id
     )
 
+    # Create Spark session
+    spark = cs.create_spark_session(warehouse_path=sc.hive_warehouse_path)
+
     # Run pre-ingestion tasks
     logging.info("Running the pre-ingestion tasks.")
     run_pre_ingestion_tasks(tasks=ingestion_workflow.pre_tasks, cycle_date=cycle_date)
@@ -36,6 +41,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     # Run ingestion task
     logging.info("Running the ingestion task %s.", ingestion_workflow.ingestion_task_id)
     run_ingestion_task(
+        spark=spark,
         ingestion_task_id=ingestion_workflow.ingestion_task_id,
         cycle_date=cycle_date,
     )
@@ -48,7 +54,9 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     run_data_lineage_task(workflow_id=ingestion_workflow_id, cycle_date=cycle_date)
 
 
-def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
+def run_ingestion_task(
+    spark: SparkSession, ingestion_task_id: str, cycle_date: str
+) -> None:
     # Simulate getting the ingestion task metadata from API
     logging.info("Get ingestion task metadata")
     ingestion_task = it.IngestionTask.from_json(task_id=ingestion_task_id)
@@ -90,6 +98,7 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
 
     # Load the file
     records = sl.load_file_to_table(
+        spark=spark,
         source_file_path=source_file_path,
         qual_target_table_name=qual_target_table_name,
         target_database_name=target_database_name,

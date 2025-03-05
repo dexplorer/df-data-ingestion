@@ -4,47 +4,8 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as T
 
 # from pyspark.sql.functions import col
-
 import importlib
-
-from config.settings import ConfigParms as sc
-
 import logging
-
-
-def create_spark_session(warehouse_path) -> SparkSession:
-    # Initialize Spark session
-    spark = (
-        SparkSession.builder.appName("Spark Loader in Ingestion Workflow")
-        .config("spark.sql.warehouse.dir", warehouse_path)
-        .enableHiveSupport()
-        .getOrCreate()
-    )
-
-    # Enable dynamic partition overwrite
-    spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
-
-    return spark
-
-
-# def define_file_schema() -> StructType:
-#     # Define the file schema
-#     schema = StructType(
-#         [
-#             StructField("effective_date", StringType(), True),
-#             StructField("account_id", StringType(), True),
-#             StructField("asset_id", StringType(), True),
-#             StructField("asset_value", DecimalType(25, 2), True),
-#         ]
-#     )
-#     return schema
-
-
-# def derive_struct_schema_from_str(spark: SparkSession, json_str: str) -> StructType:
-#     from pyspark.sql.functions import schema_of_json, lit
-#     # json_str = """{"effective_date":"2024-12-26","account_id":"ACC1","asset_id":"1","asset_value":12345678901234567890123.12}"""
-#     struct_schema = spark.range(1).select(schema_of_json(lit(json_str))).collect()[0][0]
-#     return struct_schema
 
 
 def derive_struct_schema_from_str(str_schema: str) -> T.StructType:
@@ -246,6 +207,7 @@ def view_loaded_data_sample(
 
 
 def load_file_to_table(
+    spark: SparkSession,
     source_file_path: str,
     qual_target_table_name: str,
     target_database_name: str,
@@ -254,8 +216,6 @@ def load_file_to_table(
     str_schema: str,
     load_type: str,
 ):
-    spark = create_spark_session(warehouse_path=sc.hive_warehouse_path)
-    # schema = define_file_schema()
     schema = derive_struct_schema_from_str(str_schema=str_schema)
     df = create_spark_dataframe(
         spark=spark, source_file_path=source_file_path, schema=schema

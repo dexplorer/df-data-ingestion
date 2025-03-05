@@ -1,7 +1,0 @@
-"effective_date"|"measure"|"column"|"group_by_column_names"|"group_by_column_values"|"measure_value"
-2024-12-26|"count"|"account_id"|"all"|"all"|9
-2024-12-26|"count_median"|"asset_id"|"all"|"all"|"2"
-2024-12-26|"sum"|"asset_value"|"asset_id"|"1"|-65000.0
-2024-12-26|"sum"|"asset_value"|"asset_id"|"2"|-5000.0
-2024-12-26|"distinct"|"account_id"|"asset_id"|"1"|7
-2024-12-26|"distinct"|"account_id"|"asset_id"|"2"|2

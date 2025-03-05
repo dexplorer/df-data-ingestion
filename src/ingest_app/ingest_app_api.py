@@ -53,8 +53,6 @@ def main():
     load_dotenv()
 
     # Fail if env variable is not set
-    sc.env = os.environ["ENV"]
-    sc.app_root_dir = os.environ["APP_ROOT_DIR"]
     sc.load_config()
 
     script_name = os.path.splitext(os.path.basename(__file__))[0]

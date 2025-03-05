@@ -1,3 +1,0 @@
-parent_node,child_node
-"{'object_name': '/workspaces/df-data-ingestion/data/in/assets_20241226.csv', 'object_type': 'local delim file', 'complex_object': False, 'node_type': 'feed'}","{'object_name': 'workflow_1', 'object_type': 'ingestion', 'complex_object': False, 'node_type': 'process'}"
-"{'object_name': 'workflow_1', 'object_type': 'ingestion', 'complex_object': False, 'node_type': 'process'}","{'object_name': 'dl_asset_mgmt.tasset', 'object_type': 'spark table', 'complex_object': False, 'node_type': 'dataset'}"
