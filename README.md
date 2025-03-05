@@ -29,6 +29,15 @@ The data distribution service leverages the following services to perform the ta
 
 ![Data Ingestion Pipeline](docs/df-data-ingestion.png?raw=true "Data Ingestion Pipeline")
 
+### Define the environment variables
+
+Create a .env file with the following variables.
+
+```
+ENV=dev
+APP_ROOT_DIR=
+```
+
 ### Install
 
 - **Install via Makefile and pip**:
@@ -40,34 +49,34 @@ The data distribution service leverages the following services to perform the ta
 
 - **Run a ingestion workflow via CLI**:
   ```sh
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "1" --env "dev"
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "2" --env "dev"
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "3" --env "dev"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_1"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_2"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_3"
   ```
 
 - **Run a ingestion workflow via CLI with cycle date override**:
   ```sh
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "1" --env "dev" --cycle_date "2024-12-24"
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "2" --env "dev" --cycle_date "2024-12-24"
-    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "3" --env "dev" --cycle_date "2024-12-24"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_1" --cycle_date "2024-12-26"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_2" --cycle_date "2024-12-26"
+    ingest-app-cli run-ingestion-workflow --ingestion_workflow_id "workflow_3" --cycle_date "2024-12-26"
   ```
 
 - **Run a ingestion workflow via API**:
   ##### Start the API server
   ```sh
-    ingest-app-api --env "dev"
+    ingest-app-api
   ```
   ##### Invoke the API endpoint
   ```sh
     https://<host name with port number>/run-ingestion-workflow/?ingestion_workflow_id=<value>
     https://<host name with port number>/run-ingestion-workflow/?ingestion_workflow_id=<value>&cycle_date=<value>
 
-    /run-ingestion-workflow/?ingestion_workflow_id=1
-    /run-ingestion-workflow/?ingestion_workflow_id=2
-    /run-ingestion-workflow/?ingestion_workflow_id=3
-    /run-ingestion-workflow/?ingestion_workflow_id=1&cycle_date=2024-12-26
-    /run-ingestion-workflow/?ingestion_workflow_id=2&cycle_date=2024-12-26
-    /run-ingestion-workflow/?ingestion_workflow_id=3&cycle_date=2024-12-26
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_1
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_2
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_3
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_1&cycle_date=2024-12-26
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_2&cycle_date=2024-12-26
+    /run-ingestion-workflow/?ingestion_workflow_id=workflow_3&cycle_date=2024-12-26
   ```
   ##### Invoke the API from Swagger Docs interface
   ```sh
@@ -98,40 +107,47 @@ These are metadata that would be captured via the Metadata Management UI and sto
 {
   "datasets": [
     {
-      "dataset_id": "1",
+      "dataset_id": "dataset_1",
       "dataset_type": "local delim file",
-      "catalog_ind": true,
       "file_delim": ",",
       "file_path": "APP_DATA_IN_DIR/assets_yyyymmdd.csv",
-      "schedule_id": "2",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_1",
       "recon_file_delim": "|",
       "recon_file_path": "APP_DATA_IN_DIR/assets_yyyymmdd.recon"
     },
     {
-      "dataset_id": "2",
+      "dataset_id": "dataset_2",
       "dataset_type": "local delim file",
-      "catalog_ind": true,
       "file_delim": ",",
       "file_path": "APP_DATA_IN_DIR/acct_positions_yyyymmdd.csv",
-      "schedule_id": "2",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_2",
       "recon_file_delim": "|",
       "recon_file_path": "APP_DATA_IN_DIR/acct_positions_yyyymmdd.recon"
     },
     {
-      "dataset_id": "3",
+      "dataset_id": "dataset_3",
       "dataset_type": "local delim file",
-      "catalog_ind": true,
       "file_delim": ",",
       "file_path": "APP_DATA_IN_DIR/customers_yyyymmdd.csv",
-      "schedule_id": "2",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_3",
       "recon_file_delim": "|",
       "recon_file_path": "APP_DATA_IN_DIR/customers_yyyymmdd.recon"
     },
     {
-      "dataset_id": "11",
+      "dataset_id": "dataset_4",
+      "dataset_type": "spark sql file",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_4",
+      "sql_file_path": "APP_SQL_SCRIPT_DIR/ext_asset_value_agg.sql"
+    },
+    {
+      "dataset_id": "dataset_11",
       "dataset_type": "spark table",
-      "catalog_ind": true,
-      "schedule_id": "2",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_4",
       "database_name": "dl_asset_mgmt",
       "table_name": "tasset",
       "partition_keys": [],
@@ -139,10 +155,10 @@ These are metadata that would be captured via the Metadata Management UI and sto
       "recon_file_path": "APP_DATA_IN_DIR/assets_yyyymmdd.recon"
     },
     {
-      "dataset_id": "12",
+      "dataset_id": "dataset_12",
       "dataset_type": "spark table",
-      "catalog_ind": true,
-      "schedule_id": "2",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_4",
       "database_name": "dl_asset_mgmt",
       "table_name": "tacct_pos",
       "partition_keys": [
@@ -150,7 +166,30 @@ These are metadata that would be captured via the Metadata Management UI and sto
       ],
       "recon_file_delim": "|",
       "recon_file_path": "APP_DATA_IN_DIR/acct_positions_yyyymmdd.recon"
-    }
+    },
+    {
+      "dataset_id": "dataset_13",
+      "dataset_type": "spark table",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_4",
+      "database_name": "dl_asset_mgmt",
+      "table_name": "tcustomer",
+      "partition_keys": [
+        "effective_date"
+      ],
+      "recon_file_delim": "|",
+      "recon_file_path": "APP_DATA_IN_DIR/customers_yyyymmdd.recon"
+    },
+    {
+      "dataset_id": "dataset_14",
+      "dataset_type": "local delim file",
+      "file_delim": "|",
+      "file_path": "APP_DATA_OUT_DIR/asset_value_agg_yyyymmdd.dat",
+      "schedule_id": "schedule_2",
+      "data_source_id": "data_source_4",
+      "recon_file_delim": null,
+      "recon_file_path": null
+    } 
   ]
 }
 
@@ -161,20 +200,20 @@ These are metadata that would be captured via the Metadata Management UI and sto
 {
     "workflows": [
       {
-        "workflow_id": "1",
+        "workflow_id": "workflow_1",
         "workflow_type": "ingestion", 
-        "ingestion_task_id": "1",
+        "ingestion_task_id": "integration_task_1",
         "pre_tasks": [
           {
             "name": "data quality",
             "required_parameters": {
-              "dataset_id": "1"
+              "dataset_id": "dataset_1"
             }
           },
           {
             "name": "data profile",
             "required_parameters": {
-              "dataset_id": "1"
+              "dataset_id": "dataset_1"
             }
           }
         ],
@@ -182,26 +221,26 @@ These are metadata that would be captured via the Metadata Management UI and sto
         ]
       },
       {
-        "workflow_id": "2",
+        "workflow_id": "workflow_2",
         "workflow_type": "ingestion", 
-        "ingestion_task_id": "2",
+        "ingestion_task_id": "integration_task_2",
         "pre_tasks": [
           {
             "name": "data quality",
             "required_parameters": {
-              "dataset_id": "2"
+              "dataset_id": "dataset_2"
             }
           },
           {
             "name": "data quality ml",
             "required_parameters": {
-              "dataset_id": "2"
+              "dataset_id": "dataset_2"
             }
           },
           {
             "name": "data profile",
             "required_parameters": {
-              "dataset_id": "2"
+              "dataset_id": "dataset_2"
             }
           }
         ],
@@ -209,30 +248,51 @@ These are metadata that would be captured via the Metadata Management UI and sto
           {
             "name": "data reconciliation",
             "required_parameters": {
-              "dataset_id": "12"
+              "dataset_id": "dataset_12"
             }
           }
         ]
       },
       {
-        "workflow_id": "3",
+        "workflow_id": "workflow_3",
         "workflow_type": "ingestion", 
-        "ingestion_task_id": "3",
+        "ingestion_task_id": "integration_task_3",
         "pre_tasks": [
           {
             "name": "data quality",
             "required_parameters": {
-              "dataset_id": "3"
+              "dataset_id": "dataset_3"
             }
           },
           {
             "name": "data profile",
             "required_parameters": {
-              "dataset_id": "3"
+              "dataset_id": "dataset_3"
             }
           }
         ],
         "post_tasks": [
+        ]
+      },
+      {
+        "workflow_id": "workflow_11",
+        "workflow_type": "distribution", 
+        "distribution_task_id": "integration_task_11",
+        "pre_tasks": [
+        ],
+        "post_tasks": [
+          {
+            "name": "data quality",
+            "required_parameters": {
+              "dataset_id": "dataset_14"
+            }
+          },
+          {
+            "name": "data quality ml",
+            "required_parameters": {
+              "dataset_id": "dataset_14"
+            }
+          }
         ]
       }
     ]
@@ -245,10 +305,10 @@ These are metadata that would be captured via the Metadata Management UI and sto
 {
     "integration_tasks": [
       {
-        "task_id": "1",
+        "task_id": "integration_task_1",
         "task_type": "ingestion",
-        "source_dataset_id": "1",
-        "target_dataset_id": "11",
+        "source_dataset_id": "dataset_1",
+        "target_dataset_id": "dataset_11",
         "ingestion_pattern": {
             "loader": "spark",
             "source_type": "local delim file", 
@@ -258,10 +318,10 @@ These are metadata that would be captured via the Metadata Management UI and sto
         } 
       },
       {
-        "task_id": "2",
+        "task_id": "integration_task_2",
         "task_type": "ingestion",
-        "source_dataset_id": "2",
-        "target_dataset_id": "12",
+        "source_dataset_id": "dataset_2",
+        "target_dataset_id": "dataset_12",
         "ingestion_pattern": {
             "loader": "spark",
             "source_type": "local delim file", 
@@ -271,10 +331,10 @@ These are metadata that would be captured via the Metadata Management UI and sto
         } 
       },
       {
-        "task_id": "3",
+        "task_id": "integration_task_3",
         "task_type": "ingestion",
-        "source_dataset_id": "3",
-        "target_dataset_id": "13",
+        "source_dataset_id": "dataset_3",
+        "target_dataset_id": "dataset_13",
         "ingestion_pattern": {
             "loader": "spark",
             "source_type": "local delim file", 
@@ -282,10 +342,21 @@ These are metadata that would be captured via the Metadata Management UI and sto
             "load_type": "incremental", 
             "idempotent": true 
         } 
-      }
+      },
+      {
+        "task_id": "integration_task_11",
+        "task_type": "distribution",
+        "source_dataset_id": "dataset_4",
+        "target_dataset_id": "dataset_14",
+        "distribution_pattern": {
+            "extracter": "spark",
+            "source_type": "spark sql file", 
+            "target_type": "local delim file" 
+        } 
+      }      
     ]
   }
-    
+      
 ```
 
 ### Sample Output 

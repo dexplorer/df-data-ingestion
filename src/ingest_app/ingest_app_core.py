@@ -23,9 +23,6 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     if not cycle_date:
         cycle_date = ed.get_cur_cycle_date()
 
-    logging.info("***CFG***")
-    logging.info(sc.config["CONFIG"].get())
-
     # Simulate getting the ingestion workflow metadata from API
     logging.info("Get ingestion workflow metadata")
     ingestion_workflow = iw.IngestionWorkflow.from_json(
@@ -86,8 +83,9 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     qual_target_table_name = tgt_dataset.get_qualified_table_name()
     target_database_name = tgt_dataset.database_name
     partition_keys = tgt_dataset.partition_keys
-    # str_schema = get_dataset_schema(dataset_id=ingestion_task.source_dataset_id)
-    str_schema = get_str_schema_from_metadata(dataset_id=ingestion_task.target_dataset_id)
+    str_schema = get_str_schema_from_metadata(
+        dataset_id=ingestion_task.target_dataset_id
+    )
     load_type = ingestion_task.ingestion_pattern.load_type
 
     # Load the file
@@ -194,50 +192,6 @@ def run_post_ingestion_tasks(tasks: list[iw.ManagementTask], cycle_date: str) ->
             run_data_recon_task(
                 required_parameters=task.required_parameters, cycle_date=cycle_date
             )
-
-
-# def get_dataset_schema(dataset_id: str) -> str:
-#     # Specify the str schema in the format source column name, target column name, data type
-#     # Capture this as part of dataset metadata.
-#     # This is not needed if the spark tables are defined up front (as is the case in production).
-#     str_schemas = {
-#         "1": [
-#             ("effective_date", "effective_date", "string"),
-#             ("asset_id", "asset_id", "string"),
-#             ("asset_type", "asset_type", "string"),
-#             ("asset_name", "asset_name", "string"),
-#         ],
-#         "2": [
-#             ("effective_date", "effective_date", "string"),
-#             ("account_id", "account_id", "string"),
-#             ("asset_id", "asset_id", "string"),
-#             ("asset_value", "asset_value", "decimal(25,2)"),
-#         ],
-#         "3": [
-#             ("effective_date", "effective_date", "string"),
-#             ("first_name", "first_name", "string"),
-#             ("last_name", "last_name", "string"),
-#             ("full_name", "full_name", "string"),
-#             ("ssn", "ssn", "string"),
-#             ("dob", "dob", "string"),
-#             ("street_addr1", "street_addr1", "string"),
-#             ("street_addr2", "street_addr2", "string"),
-#             ("city", "city", "string"),
-#             ("state", "state", "string"),
-#             ("country", "country", "string"),
-#         ],
-#     }
-
-#     try:
-#         if dataset_id in str_schemas:
-#             str_schema_for_dataset = str_schemas[dataset_id]
-#         else:
-#             raise ValueError("Schema is not defined for the dataset.")
-#     except ValueError as error:
-#         logging.error(error)
-#         raise
-
-#     return str_schema_for_dataset
 
 
 def get_str_schema_from_metadata(dataset_id: str):

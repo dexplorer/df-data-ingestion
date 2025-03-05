@@ -55,17 +55,17 @@ def derive_struct_schema_from_str(str_schema: str) -> T.StructType:
     for column in str_schema:
         # col_name = schema_row[1]
         # str_type = schema_row[2]
-        col_name = column['column_name']
-        str_type = column['data_type']
+        col_name = column["column_name"]
+        str_type = column["data_type"]
 
-        struct_type = 'StringType'
+        struct_type = "StringType"
         struct_type_func = getattr(mod, struct_type)()
-        if str_type.startswith('decimal'):
-            _, _, suffix = str_type.rpartition('(')
+        if str_type.startswith("decimal"):
+            _, _, suffix = str_type.rpartition("(")
             # precision_scale = f"{match}{suffix}"
             # struct_type = f"DecimalType{precision_scale}"
-            precision, _, scale = suffix.replace(')', '').rpartition(',')
-            struct_type = 'DecimalType'
+            precision, _, scale = suffix.replace(")", "").rpartition(",")
+            struct_type = "DecimalType"
             if precision and scale:
                 struct_type_func = getattr(mod, struct_type)(int(precision), int(scale))
             else:

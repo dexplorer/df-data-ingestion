@@ -1,9 +1,9 @@
 install: pyproject.toml
 	pip install --upgrade pip &&\
 	pip install --editable . &&\
-	pip install .[cli] &&\
-	pip install .[api] &&\
-	pip install .[test]
+	pip install --editable .[cli] &&\
+	pip install --editable .[api] &&\
+	pip install --editable .[test]
 
 lint:
 	pylint --disable=R,C src/ingest_app/*.py &&\
