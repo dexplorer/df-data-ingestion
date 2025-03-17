@@ -32,7 +32,7 @@ def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> None:
     )
 
     # Create Spark session
-    spark = cs.create_spark_session(warehouse_path=sc.hive_warehouse_path)
+    spark = cs.create_spark_session(warehouse_path=sc.hive_warehouse_dir)
 
     # Run pre-ingestion tasks
     logging.info("Running the pre-ingestion tasks.")
