@@ -21,28 +21,38 @@ dependencies = [
   # app specific 
   "pyspark == 3.5.4",
   "python-dotenv", 
-  # my packages
-  "utils", 
-  "metadata", 
-  "app_calendar", 
-  "dq_app", 
-  "dqml_app", 
-  "dp_app", 
-  "dr_app", 
-  "dl_app", 
-  # my packages
-  #"utils @ git+https://github.com/dexplorer/utils",
-  #"metadata @ git+https://github.com/dexplorer/df-metadata",
-  #"app_calendar @ git+https://github.com/dexplorer/df-app-calendar",
-  #"dq_app @ git+https://github.com/dexplorer/df-data-quality",
-  #"dqml_app @ git+https://github.com/dexplorer/df-data-quality-ml",
-  #"dp_app @ git+https://github.com/dexplorer/df-data-profile",
-  #"dr_app @ git+https://github.com/dexplorer/df-data-recon",
-  #"dl_app @ git+https://github.com/dexplorer/df-data-lineage",
 ]
 keywords = ["data", "ingestion", "etl", "elt", "framework", "load"]
 
 [project.optional-dependencies]
+my-packages-local = [
+  # my packages (installed locally)
+  "utils[spark]",
+  "utils[aws]",
+  "metadata",
+  "app_calendar",
+  "config",
+  "gov",
+  #"dl_app", 
+  #"dp_app", 
+  #"dq_app", 
+  #"dqml_app", 
+  #"dr_app", 
+]
+my-packages-container = [
+  # my packages (source in container)
+  "utils[spark] @ file:///packages/utils",
+  "utils[aws] @ file:///packages/utils",
+  "metadata @ file:///packages/df-metadata",
+  "app_calendar @ file:///packages/df-app-calendar",
+  "config @ file:///packages/df-config",
+  "gov @ file:///packages/df-data-governance",
+  #"dl_app @ file:///packages/df-data-lineage",
+  #"dp_app @ file:///packages/df-data-profile",
+  #"dq_app @ file:///packages/df-data-quality",
+  #"dqml_app @ file:///packages/df-data-quality-ml",
+  #"dr_app @ file:///packages/df-data-recon",
+]
 api = [
   "fastapi" , 
   "uvicorn[standard]", 
@@ -58,6 +68,12 @@ test = [
   "black",
   "ipython",
 ]
+all-dev = [
+  "ingest_app[my-packages-local, cli, api, test]"
+  ]
+all = [
+  "ingest_app[my-packages-container, cli, api]"
+  ]
 
 [project.scripts]
 ingest-app-cli = "ingest_app.ingest_app_cli:main"
@@ -66,6 +82,6 @@ ingest-app-api = "ingest_app.ingest_app_api:main"
 [project.urls]
 Homepage = "https://profile.rajakumaran.in"
 Documentation = "https://readthedocs.org"
-Repository = "https://github.com/dexplorer/df-data-distribution.git"
-Issues = "https://github.com/dexplorer/df-data-distribution/issues"
-Changelog = "https://github.com/dexplorer/df-data-distribution/blob/master/CHANGELOG.md"
+Repository = "https://github.com/dexplorer/df-data-ingestion.git"
+Issues = "https://github.com/dexplorer/df-data-ingestion/issues"
+Changelog = "https://github.com/dexplorer/df-data-ingestion/blob/master/CHANGELOG.md"
