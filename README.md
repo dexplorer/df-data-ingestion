@@ -34,10 +34,10 @@ The data distribution service leverages the following services to perform the ta
 Update one of the following .env files which is appropriate for the application hosting pattern.
 
 ```
-.env.on_prem_vm_native
-.env.aws_ec2_native
-.env.aws_ec2_container
-.env.aws_ecs_container
+app_env.on_prem_vm_native.dev.env
+app_env.aws_ec2_native.dev.env
+app_env.aws_ec2_container.dev.env
+app_env.aws_ecs_container.dev.env
 ```
 
 ### Install
@@ -116,6 +116,10 @@ docker-compose --project-name=df-spark up
     ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_1"
     ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_2"
     ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_3"
+
+    ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_101"
+    ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_102"
+    ingest-app-cli --app_host_pattern "aws_ec2_native" run-ingestion-workflow --ingestion_workflow_id "workflow_103"
   ```
 
 - **Run a ingestion workflow via CLI with cycle date override**:

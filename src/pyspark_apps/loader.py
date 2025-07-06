@@ -1,10 +1,73 @@
-from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql import types as T
-import importlib
-import logging
 import argparse
+import importlib
 import json
+import logging
+import os
+
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import types as T
+
+from config.settings import ConfigParms as sc
+from metadata import dataset as ds
+from utils import aws_s3_io as ufas
 from utils import spark_io as ufs
+
+
+def load_file_to_table(
+    spark: SparkSession,
+    source_file_path: str,
+    source_dataset_id: str,
+    qual_target_table_name: str,
+    target_database_name: str,
+    partition_keys: str,
+    cur_eff_date: str,
+    target_table_schema: str,
+    load_type: str,
+    warehouse_path: str,
+    debug: str,
+):
+    print("Databases in catalog:")
+    logging.info(spark.catalog.listDatabases())
+    print(spark.catalog.listDatabases())
+
+    # logging.info("Tables in database %s", target_database_name)
+    # logging.info(spark.catalog.listTables(dbName=target_database_name))
+
+    schema = derive_struct_schema_from_str(
+        target_table_schema=json.loads(target_table_schema)
+    )  # convert to list[dict]
+    df = create_spark_dataframe(
+        spark=spark,
+        source_file_path=source_file_path,
+        schema=schema,
+        source_dataset_id=source_dataset_id,
+    )
+    create_target_database(
+        spark=spark,
+        target_database_name=target_database_name,
+        warehouse_path=warehouse_path,
+    )
+    write_spark_dataframe(
+        spark=spark,
+        df=df,
+        qual_target_table_name=qual_target_table_name,
+        partition_keys=json.loads(partition_keys),  # convert to list[str]
+        load_type=load_type,
+    )
+    if debug == "y":
+        view_loaded_data_sample(
+            spark=spark,
+            qual_target_table_name=qual_target_table_name,
+            cur_eff_date=cur_eff_date,
+        )
+    target_record_count = validate_load(
+        spark=spark,
+        source_df=df,
+        qual_target_table_name=qual_target_table_name,
+        cur_eff_date=cur_eff_date,
+    )
+
+    return target_record_count
 
 
 def derive_struct_schema_from_str(target_table_schema: list[dict]) -> T.StructType:
@@ -42,15 +105,46 @@ def derive_struct_schema_from_str(target_table_schema: list[dict]) -> T.StructTy
 
 
 def create_spark_dataframe(
-    spark: SparkSession, source_file_path: str, schema: T.StructType
+    spark: SparkSession,
+    source_file_path: str,
+    schema: T.StructType,
+    source_dataset_id: str,
 ):
-    logging.info("Reading the file %s", source_file_path)
-    df = (
-        spark.read.format("csv")
-        .option("header", "true")
-        .option("schema", schema)
-        .load(source_file_path)
-    )
+
+    # Simulate getting the source dataset metadata from API
+    logging.info("Get source dataset metadata")
+    source_dataset = ds.get_dataset_from_json(dataset_id=source_dataset_id)
+
+    df = ufs.create_empty_df(spark=spark)
+    if source_dataset.dataset_type == ds.DatasetType.LOCAL_DELIM_FILE:
+        if os.path.exists(source_file_path):
+            logging.info("Reading the file %s", source_file_path)
+            df = ufs.read_delim_file_into_spark_df(
+                file_path=source_file_path,
+                delim=source_dataset.file_delim,
+                schema=schema,
+                spark=spark,
+            )
+        else:
+            raise RuntimeError(f"File {source_file_path} does not exist.")
+
+    elif source_dataset.dataset_type == ds.DatasetType.AWS_S3_DELIM_FILE:
+        # s3_client = ufas.get_s3_client(s3_region=sc.s3_region)
+        # App configuration settings (sc) are not passed over to the spark cluster.
+        # They need to be explicitly passed via the spark submit command
+        s3_client = ufas.get_s3_client()
+
+        if ufas.s3_obj_exists(s3_obj_uri=source_file_path, s3_client=s3_client):
+            logging.info("Reading the file %s", source_file_path)
+            df = ufs.read_delim_file_into_spark_df(
+                file_path=source_file_path.replace("s3://", "s3a://"),
+                delim=source_dataset.file_delim,
+                schema=schema,
+                spark=spark,
+            )
+        else:
+            raise RuntimeError(f"File {source_file_path} does not exist.")
+
     return df
 
 
@@ -151,7 +245,21 @@ def write_spark_dataframe(
                 format="parquet",
                 partitionBy=partition_keys,
             )
+
+        # Refresh metadata
+        spark.catalog.refreshTable(tableName=qual_target_table_name)
+
         # spark.sql(f"GRANT ALL ON TABLE {qual_target_table_name} TO USER ec2-user;")
+
+
+def view_loaded_data_sample(
+    spark: SparkSession, qual_target_table_name: str, cur_eff_date: str
+):
+    df = spark.sql(
+        f"SELECT * FROM {qual_target_table_name} WHERE EFFECTIVE_DATE='{cur_eff_date}';"
+    )
+    df.printSchema()
+    df.show(2)
 
 
 def validate_load(
@@ -178,69 +286,6 @@ def validate_load(
             source_record_count,
             target_record_count,
         )
-
-    return target_record_count
-
-
-def view_loaded_data_sample(
-    spark: SparkSession, qual_target_table_name: str, cur_eff_date: str
-):
-    df = spark.sql(
-        f"SELECT * FROM {qual_target_table_name} WHERE EFFECTIVE_DATE='{cur_eff_date}';"
-    )
-    df.printSchema()
-    df.show(2)
-
-
-def load_file_to_table(
-    spark: SparkSession,
-    source_file_path: str,
-    qual_target_table_name: str,
-    target_database_name: str,
-    partition_keys: str,
-    cur_eff_date: str,
-    target_table_schema: str,
-    load_type: str,
-    warehouse_path: str,
-    debug: str, 
-):
-    print("Databases in catalog:")
-    logging.info(spark.catalog.listDatabases())
-    print(spark.catalog.listDatabases())
-
-    # logging.info("Tables in database %s", target_database_name)
-    # logging.info(spark.catalog.listTables(dbName=target_database_name))
-
-    schema = derive_struct_schema_from_str(
-        target_table_schema=json.loads(target_table_schema)
-    )  # convert to list[dict]
-    df = create_spark_dataframe(
-        spark=spark, source_file_path=source_file_path, schema=schema
-    )
-    create_target_database(
-        spark=spark,
-        target_database_name=target_database_name,
-        warehouse_path=warehouse_path,
-    )
-    write_spark_dataframe(
-        spark=spark,
-        df=df,
-        qual_target_table_name=qual_target_table_name,
-        partition_keys=json.loads(partition_keys),  # convert to list[str]
-        load_type=load_type,
-    )
-    if debug == 'y':
-        view_loaded_data_sample(
-            spark=spark,
-            qual_target_table_name=qual_target_table_name,
-            cur_eff_date=cur_eff_date,
-        )
-    target_record_count = validate_load(
-        spark=spark,
-        source_df=df,
-        qual_target_table_name=qual_target_table_name,
-        cur_eff_date=cur_eff_date,
-    )
 
     return target_record_count
 
@@ -279,6 +324,12 @@ def main():
     )
     parser.add_argument(
         "--source_file_path",
+        help="",
+        nargs=None,  # 1 value
+        required=True,
+    )
+    parser.add_argument(
+        "--source_dataset_id",
         help="",
         nargs=None,  # 1 value
         required=True,
@@ -337,6 +388,7 @@ def main():
     spark_local_dir = args["spark_local_dir"]
     postgres_uri = args["postgres_uri"]
     source_file_path = args["source_file_path"]
+    source_dataset_id = args["source_dataset_id"]
     qual_target_table_name = args["qual_target_table_name"]
     target_database_name = args["target_database_name"]
     partition_keys = args["partition_keys"]
@@ -364,6 +416,7 @@ def main():
     records = load_file_to_table(
         spark=spark,
         source_file_path=source_file_path,
+        source_dataset_id=source_dataset_id,
         qual_target_table_name=qual_target_table_name,
         target_database_name=target_database_name,
         partition_keys=partition_keys,

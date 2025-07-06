@@ -1,12 +1,13 @@
-import os
+import argparse
 import logging
+import os
+
+import uvicorn
+from fastapi import FastAPI
 
 from config.settings import ConfigParms as sc
 from ingest_app import ingest_app_core as dic
 from utils import logger as ufl
-import argparse
-from fastapi import FastAPI
-import uvicorn
 
 app = FastAPI()
 

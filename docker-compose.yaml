@@ -1,0 +1,29 @@
+services:
+  df-data-ingestion:
+    image: df-data-ingestion:latest
+    container_name: df-data-ingestion
+    hostname: df-data-ingestion
+    ports:
+      - "9081:9090"  # API
+    networks:
+      - dfnet
+    # user: ${APP_INFRA_USER_NAME}:${APP_INFRA_USER_GROUP_NAME}
+    volumes:
+      - type: bind
+        source: /nas
+        target: /nas
+      - type: bind
+        source: /home/ec2-user/workspaces/df-data-ingestion/app_env.aws_ec2_container.dev.env
+        target: /df-data-ingestion/app_env.aws_ec2_container.dev.env
+      - type: bind
+        source: /home/ec2-user/workspaces/df-config/global_env.aws_ec2_container.dev.env
+        target: /packages/df-config/global_env.aws_ec2_container.dev.env
+      - type: bind
+        source: /home/ec2-user/workspaces/df-config/cfg/global_config.dev.yaml
+        target: /packages/df-config/cfg/global_config.dev.yaml
+    # env_file:
+    #   - .env.spark
+    entrypoint: ["ingest-app-api", "--app_host_pattern", "aws_ec2_container"]   
+
+networks:
+  dfnet:

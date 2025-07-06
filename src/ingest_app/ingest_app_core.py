@@ -1,19 +1,16 @@
-from metadata import dataset as ds
-from metadata import data_source as dsrc
-from app_calendar import eff_date as ed
-from metadata import workflow as iw
-from metadata import integration_task as it
-from metadata import dataset_schema as dh
-from gov import gov_tasks as dg
-
-from config.settings import ConfigParms as sc
-
+import json
 import logging
 import os
 
+from app_calendar import eff_date as ed
+from config.settings import ConfigParms as sc
+from gov import gov_tasks as dg
+from metadata import data_source as dsrc
+from metadata import dataset as ds
+from metadata import dataset_schema as dh
+from metadata import integration_task as it
+from metadata import workflow as iw
 from utils import spark_io as ufs
-
-import json
 
 
 def run_ingestion_workflow(ingestion_workflow_id: str, cycle_date: str) -> list[dict]:
@@ -144,28 +141,66 @@ def run_ingestion_task(ingestion_task_id: str, cycle_date: str) -> None:
     # Load data
     logging.info("Loading data")
 
-    spark_submit_command_str = f"""
-    {os.environ['SPARK_HOME']}/bin/spark-submit \
-    --master {sc.spark_master_uri} \
-    --deploy-mode {sc.spark_deploy_mode} \
-    --num-executors 1 \
-    --executor-memory=2g \
-    --executor-cores 1 \
-    {sc.app_root_dir}/src/pyspark_apps/loader.py \
-    --warehouse_path={sc.spark_warehouse_path} \
-    --spark_master_uri={sc.spark_master_uri} \
-    --spark_history_log_dir={sc.spark_history_log_dir} \
-    --spark_local_dir={sc.spark_local_dir} \
-    --postgres_uri={sc.postgres_uri} \
-    --source_file_path={source_file_path} \
-    --qual_target_table_name={qual_target_table_name} \
-    --target_database_name={target_database_name} \
-    --partition_keys={partition_keys} \
-    --cur_eff_date={cur_eff_date} \
-    --target_table_schema={target_table_schema} \
-    --load_type={load_type} \
-    --debug={debug}
-    """
+    # --packages="org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.782" \
+
+    if (
+        sc.spark_cluster_manager == SparkClusterManager.STANDALONE
+        and sc.spark_host_pattern == SparkHostPattern.AWS_EC2_CONTAINER
+    ):
+        jars_dir = "src/pyspark_apps/jars"
+        # jars_dir = "local:/opt/spark/jars"
+        # jars_dir = "hdfs:/opt/spark/jars"
+
+        spark_submit_command_str = f"""
+        {os.environ['SPARK_HOME']}/bin/spark-submit \
+        --master {sc.spark_master_uri} \
+        --deploy-mode {sc.spark_deploy_mode} \
+        --num-executors 1 \
+        --executor-memory=3g \
+        --executor-cores 1 \
+        --jars={jars_dir}/hadoop-aws-3.3.4.jar,{jars_dir}/aws-java-sdk-bundle-1.12.782.jar \
+        {sc.app_root_dir}/src/pyspark_apps/loader.py \
+        --warehouse_path={sc.spark_warehouse_path} \
+        --spark_master_uri={sc.spark_master_uri} \
+        --spark_history_log_dir={sc.spark_history_log_dir} \
+        --spark_local_dir={sc.spark_local_dir} \
+        --postgres_uri={sc.postgres_uri} \
+        --source_file_path={source_file_path} \
+        --source_dataset_id={source_dataset.dataset_id} \
+        --qual_target_table_name={qual_target_table_name} \
+        --target_database_name={target_database_name} \
+        --partition_keys={partition_keys} \
+        --cur_eff_date={cur_eff_date} \
+        --target_table_schema={target_table_schema} \
+        --load_type={load_type} \
+        --debug={debug}
+        """
+
+    elif (
+        cls.spark_cluster_manager == SparkClusterManager.YARN
+        and cls.spark_host_pattern == SparkHostPattern.AWS_EMR_CLUSTER
+    ):
+        spark_submit_command_str = f"""
+        spark-submit \
+        --master {sc.spark_master_uri} \
+        --deploy-mode {sc.spark_deploy_mode} \
+        --conf spark.executor.instances=1 \
+        --conf spark.executor.cores=1 \
+        --conf spark.executor.memory=3g \
+        {sc.app_root_dir}/src/pyspark_apps/loader.py \
+        --warehouse_path={sc.spark_warehouse_path} \
+        --spark_master_uri={sc.spark_master_uri} \
+        --source_file_path={source_file_path} \
+        --source_dataset_id={source_dataset.dataset_id} \
+        --qual_target_table_name={qual_target_table_name} \
+        --target_database_name={target_database_name} \
+        --partition_keys={partition_keys} \
+        --cur_eff_date={cur_eff_date} \
+        --target_table_schema={target_table_schema} \
+        --load_type={load_type} \
+        --debug={debug}
+        """
+
     # ufs.spark_submit_with_callback(
     #     command=spark_submit_command_str, callback=spark_submit_callback
     # )
